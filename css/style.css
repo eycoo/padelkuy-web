@@ -142,6 +142,39 @@ a { color: inherit; text-decoration: none; }
   color: var(--text);
 }
 
+#date-picker-wrapper {
+  position: relative;
+}
+.custom-select-display {
+  color: #5a5f68;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 2px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.custom-select-display.has-value {
+  color: var(--text);
+}
+.calendar-popup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 320px;
+  background: var(--charcoal-soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  margin-top: 15px;
+}
+.calendar-popup.active {
+  display: block;
+}
+
 .courts {
   padding: 30px 60px 80px;
   max-width: 1200px;

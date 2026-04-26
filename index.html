@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PadelKuy — Book Your Court</title>
 <link rel="stylesheet" href="css/style.css">
+<script src="main.js"></script>
 </head>
 <body>
 
@@ -31,22 +32,24 @@
           <option>Yogyakarta</option>
         </select>
       </div>
-      <div class="search-field">
-        <label for="date">Date</label>
-        <select id="date">
-          <option value="" disabled selected>Pilih tanggal...</option>
-          <option>Sabtu, 26 Apr</option>
-          <option>Minggu, 27 Apr</option>
-          <option>Senin, 28 Apr</option>
-          <option>Selasa, 29 Apr</option>
-          <option>Rabu, 30 Apr</option>
-          <option>Kamis, 1 Mei</option>
-          <option>Jumat, 2 Mei</option>
-          <option>Sabtu, 3 Mei</option>
-          <option>Minggu, 4 Mei</option>
-          <option>Senin, 5 Mei</option>
-        </select>
+      <div class="search-field" id="date-picker-wrapper">
+        <label>Date</label>
+        <div id="date-display" class="custom-select-display">Pilih tanggal...</div>
+        <input type="hidden" id="selected-date" name="date">
+
+        <div id="custom-calendar-popup" class="calendar-popup">
+          <div class="calendar-head">
+            <h4 id="kalender-bulan-tahun">April 2026</h4>
+            <div class="calendar-nav">
+              <button type="button" id="prev-month">‹</button>
+              <button type="button" id="next-month">›</button>
+            </div>
+          </div>
+          <div class="calendar" id="kalender-grid">
+          </div>
+        </div>
       </div>
+</div>
       <a href="#time-picker" class="btn btn-primary">Search Courts</a>
     </div>
   </section>
