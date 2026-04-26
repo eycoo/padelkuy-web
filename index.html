@@ -10,7 +10,6 @@
 
   <nav class="navbar">
     <div class="logo">Padel<span>Kuy</span></div>
-    <button class="btn btn-ghost">Login</button>
   </nav>
 
   <section class="hero">
@@ -19,12 +18,34 @@
 
     <div class="search-bar">
       <div class="search-field">
-        <label>Location</label>
-        <input type="text" placeholder="Jakarta, Bali, Bandung...">
+        <label for="loc">Location</label>
+        <select id="loc">
+          <option value="" disabled selected>Pilih kota...</option>
+          <option>Jakarta Selatan</option>
+          <option>Jakarta Pusat</option>
+          <option>Jakarta Barat</option>
+          <option>Jakarta Utara</option>
+          <option>Bandung</option>
+          <option>Bali</option>
+          <option>Surabaya</option>
+          <option>Yogyakarta</option>
+        </select>
       </div>
       <div class="search-field">
-        <label>Date</label>
-        <input type="text" placeholder="Pick a day">
+        <label for="date">Date</label>
+        <select id="date">
+          <option value="" disabled selected>Pilih tanggal...</option>
+          <option>Sabtu, 26 Apr</option>
+          <option>Minggu, 27 Apr</option>
+          <option>Senin, 28 Apr</option>
+          <option>Selasa, 29 Apr</option>
+          <option>Rabu, 30 Apr</option>
+          <option>Kamis, 1 Mei</option>
+          <option>Jumat, 2 Mei</option>
+          <option>Sabtu, 3 Mei</option>
+          <option>Minggu, 4 Mei</option>
+          <option>Senin, 5 Mei</option>
+        </select>
       </div>
       <a href="#time-picker" class="btn btn-primary">Search Courts</a>
     </div>

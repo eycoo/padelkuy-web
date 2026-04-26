@@ -10,7 +10,6 @@
 
   <nav class="navbar">
     <div class="logo">Padel<span>Kuy</span></div>
-    <button class="btn btn-ghost">Login</button>
   </nav>
 
   <div class="breadcrumb">
@@ -66,58 +65,149 @@
         <div class="day-label">Sa</div>
         <div class="day-label">Su</div>
 
-        <div class="date-cell muted">30</div>
-        <div class="date-cell muted">31</div>
-        <div class="date-cell">1</div>
-        <div class="date-cell">2</div>
-        <div class="date-cell disabled">3</div>
-        <div class="date-cell">4</div>
-        <div class="date-cell">5</div>
+        <span class="date-cell muted">30</span>
+        <span class="date-cell muted">31</span>
+        <span class="date-cell past">1</span>
+        <span class="date-cell past">2</span>
+        <span class="date-cell past">3</span>
+        <span class="date-cell past">4</span>
+        <span class="date-cell past">5</span>
 
-        <div class="date-cell">6</div>
-        <div class="date-cell disabled">7</div>
-        <div class="date-cell">8</div>
-        <div class="date-cell">9</div>
-        <div class="date-cell">10</div>
-        <div class="date-cell">11</div>
-        <div class="date-cell">12</div>
+        <span class="date-cell past">6</span>
+        <span class="date-cell past">7</span>
+        <span class="date-cell past">8</span>
+        <span class="date-cell past">9</span>
+        <span class="date-cell past">10</span>
+        <span class="date-cell past">11</span>
+        <span class="date-cell past">12</span>
 
-        <div class="date-cell">13</div>
-        <div class="date-cell">14</div>
-        <div class="date-cell">15</div>
-        <div class="date-cell disabled">16</div>
-        <div class="date-cell">17</div>
-        <div class="date-cell">18</div>
-        <div class="date-cell">19</div>
+        <span class="date-cell past">13</span>
+        <span class="date-cell past">14</span>
+        <span class="date-cell past">15</span>
+        <span class="date-cell past">16</span>
+        <span class="date-cell past">17</span>
+        <span class="date-cell past">18</span>
+        <span class="date-cell past">19</span>
 
-        <div class="date-cell">20</div>
-        <div class="date-cell">21</div>
-        <div class="date-cell">22</div>
-        <div class="date-cell">23</div>
-        <div class="date-cell">24</div>
-        <div class="date-cell">25</div>
-        <div class="date-cell active">26</div>
+        <span class="date-cell past">20</span>
+        <span class="date-cell past">21</span>
+        <span class="date-cell past">22</span>
+        <span class="date-cell past">23</span>
+        <span class="date-cell past">24</span>
+        <span class="date-cell past">25</span>
+        <a href="#slots-26" class="date-cell today">26</a>
 
-        <div class="date-cell">27</div>
-        <div class="date-cell">28</div>
-        <div class="date-cell">29</div>
-        <div class="date-cell">30</div>
-        <div class="date-cell muted">1</div>
-        <div class="date-cell muted">2</div>
-        <div class="date-cell muted">3</div>
+        <a href="#slots-27" class="date-cell">27</a>
+        <a href="#slots-28" class="date-cell">28</a>
+        <a href="#slots-29" class="date-cell">29</a>
+        <a href="#slots-30" class="date-cell">30</a>
+        <span class="date-cell muted">1</span>
+        <span class="date-cell muted">2</span>
+        <span class="date-cell muted">3</span>
       </div>
 
-      <p class="slots-label">Pick a time slot</p>
-      <div class="slots">
-        <button class="slot">08:00</button>
-        <button class="slot taken">09:00</button>
-        <button class="slot">10:00</button>
-        <button class="slot selected">11:00</button>
-        <button class="slot">12:00</button>
-        <button class="slot taken">13:00</button>
-        <button class="slot">14:00</button>
-        <button class="slot">15:00</button>
-        <button class="slot">16:00</button>
+      <div class="slots-wrap">
+        <p class="slots-prompt">Pilih tanggal untuk melihat slot tersedia</p>
+
+        <div id="slots-26" class="slot-group">
+          <p class="slots-label">Sabtu, 26 April</p>
+          <div class="slots">
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-07" class="sr-only" disabled><label for="t26-07" class="slot taken">07:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-08" class="sr-only"><label for="t26-08" class="slot">08:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-09" class="sr-only"><label for="t26-09" class="slot">09:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-10" class="sr-only" disabled><label for="t26-10" class="slot taken">10:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-11" class="sr-only"><label for="t26-11" class="slot">11:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-12" class="sr-only"><label for="t26-12" class="slot">12:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-13" class="sr-only" disabled><label for="t26-13" class="slot taken">13:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-14" class="sr-only"><label for="t26-14" class="slot">14:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-15" class="sr-only"><label for="t26-15" class="slot">15:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-16" class="sr-only"><label for="t26-16" class="slot">16:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-17" class="sr-only" disabled><label for="t26-17" class="slot taken">17:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-18" class="sr-only"><label for="t26-18" class="slot">18:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-19" class="sr-only"><label for="t26-19" class="slot">19:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t26-20" class="sr-only"><label for="t26-20" class="slot">20:00</label></div>
+          </div>
+        </div>
+
+        <div id="slots-27" class="slot-group">
+          <p class="slots-label">Minggu, 27 April</p>
+          <div class="slots">
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-07" class="sr-only" disabled><label for="t27-07" class="slot taken">07:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-08" class="sr-only" disabled><label for="t27-08" class="slot taken">08:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-09" class="sr-only" disabled><label for="t27-09" class="slot taken">09:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-10" class="sr-only"><label for="t27-10" class="slot">10:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-11" class="sr-only" disabled><label for="t27-11" class="slot taken">11:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-12" class="sr-only" disabled><label for="t27-12" class="slot taken">12:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-13" class="sr-only"><label for="t27-13" class="slot">13:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-14" class="sr-only" disabled><label for="t27-14" class="slot taken">14:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-15" class="sr-only" disabled><label for="t27-15" class="slot taken">15:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-16" class="sr-only"><label for="t27-16" class="slot">16:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-17" class="sr-only" disabled><label for="t27-17" class="slot taken">17:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-18" class="sr-only" disabled><label for="t27-18" class="slot taken">18:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-19" class="sr-only"><label for="t27-19" class="slot">19:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t27-20" class="sr-only" disabled><label for="t27-20" class="slot taken">20:00</label></div>
+          </div>
+        </div>
+
+        <div id="slots-28" class="slot-group">
+          <p class="slots-label">Senin, 28 April</p>
+          <div class="slots">
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-07" class="sr-only"><label for="t28-07" class="slot">07:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-08" class="sr-only"><label for="t28-08" class="slot">08:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-09" class="sr-only"><label for="t28-09" class="slot">09:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-10" class="sr-only"><label for="t28-10" class="slot">10:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-11" class="sr-only"><label for="t28-11" class="slot">11:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-12" class="sr-only"><label for="t28-12" class="slot">12:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-13" class="sr-only" disabled><label for="t28-13" class="slot taken">13:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-14" class="sr-only"><label for="t28-14" class="slot">14:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-15" class="sr-only"><label for="t28-15" class="slot">15:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-16" class="sr-only"><label for="t28-16" class="slot">16:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-17" class="sr-only"><label for="t28-17" class="slot">17:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-18" class="sr-only"><label for="t28-18" class="slot">18:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-19" class="sr-only" disabled><label for="t28-19" class="slot taken">19:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t28-20" class="sr-only" disabled><label for="t28-20" class="slot taken">20:00</label></div>
+          </div>
+        </div>
+
+        <div id="slots-29" class="slot-group">
+          <p class="slots-label">Selasa, 29 April</p>
+          <div class="slots">
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-07" class="sr-only"><label for="t29-07" class="slot">07:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-08" class="sr-only"><label for="t29-08" class="slot">08:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-09" class="sr-only" disabled><label for="t29-09" class="slot taken">09:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-10" class="sr-only"><label for="t29-10" class="slot">10:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-11" class="sr-only" disabled><label for="t29-11" class="slot taken">11:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-12" class="sr-only"><label for="t29-12" class="slot">12:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-13" class="sr-only" disabled><label for="t29-13" class="slot taken">13:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-14" class="sr-only"><label for="t29-14" class="slot">14:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-15" class="sr-only" disabled><label for="t29-15" class="slot taken">15:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-16" class="sr-only"><label for="t29-16" class="slot">16:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-17" class="sr-only" disabled><label for="t29-17" class="slot taken">17:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-18" class="sr-only"><label for="t29-18" class="slot">18:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-19" class="sr-only" disabled><label for="t29-19" class="slot taken">19:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t29-20" class="sr-only"><label for="t29-20" class="slot">20:00</label></div>
+          </div>
+        </div>
+
+        <div id="slots-30" class="slot-group">
+          <p class="slots-label">Rabu, 30 April</p>
+          <div class="slots">
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-07" class="sr-only"><label for="t30-07" class="slot">07:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-08" class="sr-only" disabled><label for="t30-08" class="slot taken">08:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-09" class="sr-only"><label for="t30-09" class="slot">09:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-10" class="sr-only" disabled><label for="t30-10" class="slot taken">10:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-11" class="sr-only"><label for="t30-11" class="slot">11:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-12" class="sr-only" disabled><label for="t30-12" class="slot taken">12:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-13" class="sr-only"><label for="t30-13" class="slot">13:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-14" class="sr-only" disabled><label for="t30-14" class="slot taken">14:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-15" class="sr-only"><label for="t30-15" class="slot">15:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-16" class="sr-only" disabled><label for="t30-16" class="slot taken">16:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-17" class="sr-only"><label for="t30-17" class="slot">17:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-18" class="sr-only" disabled><label for="t30-18" class="slot taken">18:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-19" class="sr-only"><label for="t30-19" class="slot">19:00</label></div>
+            <div class="slot-option"><input type="radio" name="timeslot" id="t30-20" class="sr-only" disabled><label for="t30-20" class="slot taken">20:00</label></div>
+          </div>
+        </div>
       </div>
 
       <form class="booking-form">

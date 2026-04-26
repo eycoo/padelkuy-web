@@ -117,15 +117,30 @@ a { color: inherit; text-decoration: none; }
   color: var(--muted);
   margin-bottom: 4px;
 }
-.search-field input {
+.search-field input,
+.search-field select {
   background: transparent;
   border: none;
   color: var(--text);
   font-size: 15px;
   outline: none;
   font-family: inherit;
+  width: 100%;
 }
 .search-field input::placeholder { color: #5a5f68; }
+.search-field select {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b9099' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 20px;
+}
+.search-field select option {
+  background: var(--charcoal-soft);
+  color: var(--text);
+}
 
 .courts {
   padding: 30px 60px 80px;
@@ -337,21 +352,61 @@ a { color: inherit; text-decoration: none; }
 .date-cell:hover { background: #353941; }
 .date-cell.muted { color: #4a4e57; cursor: default; }
 .date-cell.muted:hover { background: transparent; }
-.date-cell.disabled {
-  color: #5a5f68;
-  text-decoration: line-through;
+.date-cell.past {
+  color: #3a3e47;
   cursor: not-allowed;
-  background: #232730;
 }
-.date-cell.disabled:hover { background: #232730; }
-.date-cell.active {
+.date-cell.past:hover { background: transparent; }
+a.date-cell.today {
+  border: 1px solid var(--neon);
+  color: var(--neon);
+  font-weight: 600;
+}
+
+body:has(#slots-26:target) a[href="#slots-26"],
+body:has(#slots-27:target) a[href="#slots-27"],
+body:has(#slots-28:target) a[href="#slots-28"],
+body:has(#slots-29:target) a[href="#slots-29"],
+body:has(#slots-30:target) a[href="#slots-30"] {
   background: var(--neon);
   color: var(--charcoal);
   font-weight: 700;
+  border: none;
 }
 
-.slots-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.slots-wrap { margin-bottom: 20px; }
+
+.slots-prompt {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 18px 14px;
+  border: 1px dashed #3a3f47;
+  border-radius: 10px;
+}
+body:has(.slot-group:target) .slots-prompt { display: none; }
+
+.slot-group { display: none; }
+.slot-group:target { display: block; }
+.slot-group .slots-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
 .slots { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.slot-option { display: contents; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 .slot {
   background: transparent;
   border: 1px solid #3a3f47;
@@ -361,20 +416,22 @@ a { color: inherit; text-decoration: none; }
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 .slot:hover { border-color: var(--neon); }
-.slot.selected {
+.slot-option input:checked + .slot {
   background: var(--neon);
   color: var(--charcoal);
   border-color: var(--neon);
   font-weight: 700;
 }
 .slot.taken {
-  color: #5a5f68;
+  color: #4a4e57;
   text-decoration: line-through;
   cursor: not-allowed;
+  border-color: #2e323a;
 }
-.slot.taken:hover { border-color: #3a3f47; }
+.slot.taken:hover { border-color: #2e323a; }
 
 .booking-form {
   display: flex;
@@ -402,6 +459,118 @@ a { color: inherit; text-decoration: none; }
 .booking-form input:focus { border-color: var(--neon); }
 .field { display: flex; flex-direction: column; gap: 5px; }
 .confirm-btn { margin-top: 8px; padding: 14px; font-size: 15px; width: 100%; }
+
+/* ─── Auth Page ─────────────────────────────────────────── */
+
+.auth-page { display: flex; flex-direction: column; min-height: 100vh; }
+
+.auth-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.auth-card {
+  background: var(--charcoal-soft);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-header { text-align: center; margin-bottom: 32px; }
+
+.auth-logo {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+}
+.auth-logo span { color: var(--neon); }
+
+.auth-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.auth-header p { color: var(--muted); font-size: 14px; }
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.auth-form .field label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.forgot-link { color: var(--neon); font-size: 12px; text-transform: none; letter-spacing: 0; }
+.forgot-link:hover { text-decoration: underline; }
+
+.auth-form input {
+  width: 100%;
+  background: var(--charcoal);
+  border: 1px solid #3a3f47;
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.auth-form input:focus { border-color: var(--neon); }
+
+.auth-submit { width: 100%; padding: 14px; font-size: 15px; margin-top: 4px; }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.btn-social {
+  width: 100%;
+  background: var(--charcoal);
+  border: 1px solid #3a3f47;
+  color: var(--text);
+  padding: 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.btn-social:hover { border-color: #5a5f68; transform: translateY(-1px); }
+
+.auth-footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.auth-footer a { color: var(--neon); font-weight: 600; }
+.auth-footer a:hover { text-decoration: underline; }
 
 /* ─── Time Picker ───────────────────────────────────────── */
 
