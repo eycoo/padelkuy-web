@@ -275,6 +275,33 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 26px;
 }
 
+.court-previews {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.preview-thumb {
+  background: #3a3f47;
+  height: 110px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c7079;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.preview-thumb:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
 .court-title {
   font-size: 34px;
   font-weight: 800;
@@ -713,6 +740,9 @@ body:has(.slot-group:target) .slots-prompt { display: none; }
 
   .time-picker-inner { padding: 28px 24px 32px; }
   #time-picker:target { max-height: 700px; }
+
+  .court-previews { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .preview-thumb { height: 80px; }
 
   .breadcrumb { padding-left: 24px; padding-right: 24px; }
   .detail-wrap {
