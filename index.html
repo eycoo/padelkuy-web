@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PadelKuy — Book Your Court</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="main.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Padel<span>Kuy</span></div>
+  </nav>
+
+  <section class="hero">
+    <h1>Book your padel court in <em>seconds</em>, not hours.</h1>
+    <p>Find open slots near you, lock in your time, and just show up. No phone calls, no group chats.</p>
+
+    <div class="search-bar">
+      <div class="search-field">
+        <label for="loc">Location</label>
+        <select id="loc">
+          <option value="" disabled selected>Pilih kota...</option>
+          <option>Jakarta Selatan</option>
+          <option>Jakarta Pusat</option>
+          <option>Jakarta Barat</option>
+          <option>Jakarta Utara</option>
+          <option>Bandung</option>
+          <option>Bali</option>
+          <option>Surabaya</option>
+          <option>Yogyakarta</option>
+        </select>
+      </div>
+
+      <div class="search-field" id="date-picker-wrapper">
+        <label>Date</label>
+        <div id="date-display" class="custom-select-display">Pilih tanggal...</div>
+        <input type="hidden" id="selected-date" name="date">
+
+        <div id="custom-calendar-popup" class="calendar-popup">
+          <div class="calendar-head">
+            <h4 id="kalender-bulan-tahun">April 2026</h4>
+            <div class="calendar-nav">
+              <button type="button" id="prev-month">‹</button>
+              <button type="button" id="next-month">›</button>
+            </div>
+          </div>
+          <div class="calendar" id="kalender-grid">
+          </div>
+        </div>
+      </div>
+      <a href="#courts" class="btn btn-primary">Search Courts</a>
+    </div>
+  </section>
+
+  <section id="courts" class="courts">
+    <div class="courts-header">
+      <h2>Available Courts</h2>
+      <a href="#" class="link">See all →</a>
+    </div>
+
+    <div class="court-grid">
+
+      <div class="court-card">
+        <div class="court-image">
+          <img src="assets/images/court-1-image.jpeg" alt="the G club Padel">
+        </div>
+        <div class="court-body">
+          <h3>the G club Padel</h3>
+          <span class="court-tag">Glass walls · Premium turf</span>
+          <div class="court-foot">
+            <div class="price">Rp 180k <small>/ hr</small></div>
+            <a href="detail.html#court-1" class="btn btn-primary">Book Now</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="court-card">
+        <div class="court-image">
+          <img src="assets/images/court-2-image.jpeg" alt="Fote padel and space">
+        </div>
+        <div class="court-body">
+          <h3>Fote padel and space</h3>
+          <span class="court-tag">Open air · Night lights</span>
+          <div class="court-foot">
+            <div class="price">Rp 150k <small>/ hr</small></div>
+            <a href="detail.html#court-2" class="btn btn-primary">Book Now</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="court-card">
+        <div class="court-image">
+          <img src="assets/images/court-3-image.jpeg" alt="Padel First">
+        </div>
+        <div class="court-body">
+          <h3>Padel First</h3>
+          <span class="court-tag">AC · Spectator seats</span>
+          <div class="court-foot">
+            <div class="price">Rp 200k <small>/ hr</small></div>
+            <a href="detail.html#court-3" class="btn btn-primary">Book Now</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="court-card">
+        <div class="court-image">
+          <img src="assets/images/court-4-image.jpeg" alt="Hobi Padl">
+        </div>
+        <div class="court-body">
+          <h3>Hobi Padl</h3>
+          <span class="court-tag">City view · Outdoor</span>
+          <div class="court-foot">
+            <div class="price">Rp 170k <small>/ hr</small></div>
+            <a href="detail.html#court-4" class="btn btn-primary">Book Now</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>© 2026 PadelKuy</div>
+    <div>Made by Farras & Royan.</div>
+  </footer>
+
+</body>
+</html>
