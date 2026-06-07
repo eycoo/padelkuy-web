@@ -2,10 +2,10 @@
 // GET  /api/bookings.php  -> the logged-in user's bookings
 // POST /api/bookings.php  body: { court_id, date, start_hour, end_hour }
 // Both require a logged-in session.
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../lib/http.php';
-require_once __DIR__ . '/../lib/session.php';
-require_once __DIR__ . '/../lib/bookings.php';
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../lib/http.php';
+require_once __DIR__ . '/../../lib/session.php';
+require_once __DIR__ . '/../../lib/bookings.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method !== 'POST' && $method !== 'GET') {
