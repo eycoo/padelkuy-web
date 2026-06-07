@@ -1,8 +1,8 @@
 <?php
 // POST /api/register.php  body: { name, email, password }
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../lib/http.php';
-require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../lib/http.php';
+require_once __DIR__ . '/../../lib/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_error('Method not allowed', 405);

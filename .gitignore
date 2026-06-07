@@ -4,5 +4,8 @@ phpunit.phar
 # Composer (if introduced later)
 /vendor/
 
+# PHPUnit
+.phpunit.result.cache
+
 # Local env overrides
 .env

@@ -1,9 +1,9 @@
 <?php
 // GET /api/availability.php?venue_id=1&date=YYYY-MM-DD
 // Returns each court of the venue with its derived hour grid.
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../lib/http.php';
-require_once __DIR__ . '/../lib/availability.php';
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../lib/http.php';
+require_once __DIR__ . '/../../lib/availability.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     send_error('Method not allowed', 405);
