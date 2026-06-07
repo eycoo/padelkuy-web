@@ -74,6 +74,22 @@ function getBooking(PDO $pdo, int $id): ?array
     return formatBooking($row);
 }
 
+// All bookings owned by a user, newest date first, with labels and price.
+function listUserBookings(PDO $pdo, int $user_id): array
+{
+    $stmt = $pdo->prepare(
+        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour,
+                c.label AS court_label, v.name AS venue_name, v.price_per_hour
+         FROM bookings b
+         JOIN courts c ON c.id = b.court_id
+         JOIN venues v ON v.id = c.venue_id
+         WHERE b.user_id = ?
+         ORDER BY b.date DESC, b.start_hour ASC'
+    );
+    $stmt->execute([$user_id]);
+    return array_map('formatBooking', $stmt->fetchAll());
+}
+
 // Shape a raw booking row into the API representation with a computed price.
 function formatBooking(array $row): array
 {

@@ -1,17 +1,29 @@
 <?php
+// GET  /api/bookings.php  -> the logged-in user's bookings
 // POST /api/bookings.php  body: { court_id, date, start_hour, end_hour }
-// Requires a logged-in session. Returns the created booking with price.
+// Both require a logged-in session.
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../lib/http.php';
 require_once __DIR__ . '/../lib/session.php';
 require_once __DIR__ . '/../lib/bookings.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+$method = $_SERVER['REQUEST_METHOD'];
+if ($method !== 'POST' && $method !== 'GET') {
     send_error('Method not allowed', 405);
     return;
 }
 
 $user_id = require_login();
+
+if ($method === 'GET') {
+    try {
+        send_json(listUserBookings(db(), $user_id));
+    } catch (Throwable $e) {
+        send_error('Internal server error', 500);
+    }
+    return;
+}
+
 $body = read_body();
 
 $court_id = (int) ($body['court_id'] ?? 0);
