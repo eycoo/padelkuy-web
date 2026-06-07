@@ -1,6 +1,6 @@
 <?php
 // POST /api/logout.php  ends the current session.
-require_once __DIR__ . '/../lib/http.php';
+require_once __DIR__ . '/../../lib/http.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_error('Method not allowed', 405);
