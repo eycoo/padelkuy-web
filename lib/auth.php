@@ -36,10 +36,10 @@ function register(PDO $pdo, string $name, string $email, string $password): int
     return (int) $pdo->lastInsertId();
 }
 
-// Verify credentials. Returns the user (id, name, email) on success, or null.
+// Verify credentials. Returns the user (id, name, email, role) on success, or null.
 function login(PDO $pdo, string $email, string $password): ?array
 {
-    $stmt = $pdo->prepare('SELECT id, name, email, password_hash FROM users WHERE email = ?');
+    $stmt = $pdo->prepare('SELECT id, name, email, role, password_hash FROM users WHERE email = ?');
     $stmt->execute([trim($email)]);
     $user = $stmt->fetch();
 
@@ -50,4 +50,13 @@ function login(PDO $pdo, string $email, string $password): ?array
     unset($user['password_hash']);
     $user['id'] = (int) $user['id'];
     return $user;
+}
+
+// True only if the user exists and has the admin role.
+function is_admin(PDO $pdo, int $user_id): bool
+{
+    $stmt = $pdo->prepare('SELECT role FROM users WHERE id = ?');
+    $stmt->execute([$user_id]);
+    $role = $stmt->fetchColumn();
+    return $role === 'admin';
 }

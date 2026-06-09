@@ -20,3 +20,15 @@ function require_login(): int
     }
     return $id;
 }
+
+// Require an admin: 401 if not logged in, 403 if logged in but not an admin.
+// Returns the admin user's id.
+function require_admin(PDO $pdo): int
+{
+    $id = require_login();
+    if (!is_admin($pdo, $id)) {
+        send_error('Admin access required', 403);
+        exit;
+    }
+    return $id;
+}

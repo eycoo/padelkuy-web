@@ -9,3 +9,6 @@ phpunit.phar
 
 # Local env overrides
 .env
+
+# Agent scratch (issue/PRD drafts)
+.scratch/
