@@ -5,7 +5,9 @@ Pick-up doc for whoever continues this project (frontend: Royan; or a fresh agen
 ## Where things stand
 
 PadelKuy is being turned from a static demo into a working full-stack booking app.
-**Backend is done and merged to `master`.** Frontend is next and is filed as issues #14–#18.
+**Customer backend is done and merged to `master`.** Frontend is filed as issues #14–#18.
+**Admin backend (venues/courts CRUD + all-bookings oversight) is built and tested** on
+branch `feat/admin-auth` (PRD #19, BE issues #20–#23); its frontend is #24–#26.
 
 - **Stack:** native PHP + MySQL, no fullstack framework, no Node/TypeScript (course constraint). Backend is a JSON API; frontend is plain HTML/CSS/JS calling it with `fetch()`. See `docs/adr/0002-...`.
 - **Default branch is `master`** (the real history). `main` is an unrelated 2-commit stub — ignore it.
@@ -15,10 +17,10 @@ PadelKuy is being turned from a static demo into a working full-stack booking ap
 ```
 public/            web root (serve this dir)
   index.html detail.html main.js css/ assets/   frontend (Royan)
-  api/             JSON endpoints (done)
-lib/               domain logic — http, session, auth, venues, availability, bookings
+  api/             JSON endpoints (done); api/admin/ = admin-only endpoints
+lib/               domain logic — http, session, auth, venues, courts, availability, bookings
 config/db.php      PDO connection (env-overridable)
-tests/             PHPUnit (20 tests, all green)
+tests/             PHPUnit (44 tests, all green)
 schema.sql seed.sql
 CONTEXT.md         domain glossary (Venue / Court / Slot / Booking)
 docs/adr/          0001 derive-availability, 0002 json-api
@@ -50,12 +52,30 @@ DB connection defaults: host `127.0.0.1`, db `padelkuy`, user `root`, no passwor
 | `GET /api/venues.php[?city=]` | — | `[{id,name,city,price_per_hour,tag,image_path}]` | — |
 | `GET /api/availability.php?venue_id=&date=YYYY-MM-DD` | — | `{venue_id,date,courts:[{id,label,slots:[{hour,taken}]}]}` | `422` bad params |
 | `POST /api/register.php` | `{name,email,password}` | `201 {id}` | `409` dup email · `422` invalid |
-| `POST /api/login.php` | `{email,password}` | `200 {id,name,email}` + session cookie | `401` |
+| `POST /api/login.php` | `{email,password}` | `200 {id,name,email,role}` + session cookie | `401` |
 | `POST /api/logout.php` | — | `200 {ok:true}` | — |
 | `POST /api/bookings.php` | `{court_id,date,start_hour,end_hour}` | `201 {id,venue_name,court_label,date,start_hour,end_hour,hours,price}` | `401` · `409` overlap · `422` |
 | `GET /api/bookings.php` | — (session) | `[{...booking, hours, price}]` | `401` |
 
 Frontend must send `Content-Type: application/json` and include credentials so the PHP session cookie is stored/sent.
+
+### Admin endpoints (all require an admin session)
+
+`login` now returns `role` (`"user"` or `"admin"`). Every endpoint below returns
+**401** if logged out and **403** if logged in as a non-admin. Seed admin:
+`admin@padelkuy.test` / `admin123` (from `seed.sql`).
+
+| Method + path | Body | Success | Errors |
+|---|---|---|---|
+| `GET /api/admin/venues.php[?id=N]` | — | venue list, or one venue | `404` · `403/401` |
+| `POST /api/admin/venues.php` | `{name,city,price_per_hour,tag?,image_path?}` | `201 {venue}` | `422` · `403/401` |
+| `PUT /api/admin/venues.php?id=N` | same fields | `200 {venue}` | `422` · `404` |
+| `DELETE /api/admin/venues.php?id=N` | — | `200 {ok:true}` (cascades courts/bookings) | `404` |
+| `GET /api/admin/courts.php?venue_id=N` | — | `[{id,venue_id,label}]` | `422` |
+| `POST /api/admin/courts.php` | `{venue_id,label}` | `201 {id}` | `422` |
+| `DELETE /api/admin/courts.php?id=N` | — | `200 {ok:true}` (cascades bookings) | `404` |
+| `GET /api/admin/bookings.php[?venue_id=N][&date=YYYY-MM-DD]` | — | `[{...booking, user_name}]` (all users) | `403/401` |
+| `DELETE /api/admin/bookings.php?id=N` | — | `200 {ok:true}` (frees the slot) | `404` |
 
 ## Key decisions (don't re-litigate without reason)
 
@@ -75,10 +95,19 @@ Frontend must send `Content-Type: application/json` and include credentials so t
 
 All labelled `ready-for-human`, parent #1. Start with #14/#15/#16 (independent), then #17, then #18.
 
+### Admin frontend (Royan) — issues #24–#26
+
+| Issue | What | Blocked by |
+|---|---|---|
+| #24 | Admin panel shell: login gate + nav (non-admins redirected) | #20 (BE, done) |
+| #25 | Venue & court management UI | #24, #21, #22 |
+| #26 | All-bookings table + cancel UI | #24, #23 |
+
+Parent PRD #19. The admin BE (#20–#23) is built on `feat/admin-auth`; merge that first.
+
 ## Open / loose ends
 
-- Merged remote feature branches not yet deleted: `feat/api-auth`, `feat/api-availability`, `feat/api-bookings`, `feat/api-my-bookings`, `chore/restructure-public`. Safe to delete (all merged).
-- `main` stub branch still exists. Delete or leave.
-- Dev `padelkuy` DB has leftover smoke-test rows (a `smoke@example.com` user + a few bookings). Reload `schema.sql` + `seed.sql` for clean demo data.
-- Parent PRD #1 stays open until the frontend lands.
-- Tests currently target a throwaway `padelkuy_test` DB (auto-created by `tests/bootstrap.php`).
+- `feat/admin-auth` (admin backend) is built + green but **not yet merged** — open a PR into `master`.
+- Dev `padelkuy` DB may have leftover smoke-test rows. Reload `schema.sql` + `seed.sql` for clean demo data (seed now includes the admin account).
+- Parent PRDs #1 (customer) and #19 (admin) stay open until their frontends land.
+- Tests target a throwaway `padelkuy_test` DB (auto-created by `tests/bootstrap.php`).
