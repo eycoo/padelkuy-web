@@ -90,6 +90,53 @@ function listUserBookings(PDO $pdo, int $user_id): array
     return array_map('formatBooking', $stmt->fetchAll());
 }
 
+// Admin view: every booking across all users, newest date first, with the
+// booker's name. Optional filters: 'venue_id' (int) and 'date' (YYYY-MM-DD).
+function listAllBookings(PDO $pdo, array $filters = []): array
+{
+    $where = [];
+    $args  = [];
+
+    if (!empty($filters['venue_id'])) {
+        $where[] = 'v.id = ?';
+        $args[]  = (int) $filters['venue_id'];
+    }
+    if (!empty($filters['date'])) {
+        $where[] = 'b.date = ?';
+        $args[]  = (string) $filters['date'];
+    }
+    $clause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    $stmt = $pdo->prepare(
+        "SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour,
+                c.label AS court_label, v.name AS venue_name, v.price_per_hour,
+                u.name AS user_name
+         FROM bookings b
+         JOIN courts c ON c.id = b.court_id
+         JOIN venues v ON v.id = c.venue_id
+         JOIN users  u ON u.id = b.user_id
+         $clause
+         ORDER BY b.date DESC, b.start_hour ASC"
+    );
+    $stmt->execute($args);
+
+    return array_map(function (array $row) {
+        $out = formatBooking($row);
+        $out['user_name'] = $row['user_name'];
+        return $out;
+    }, $stmt->fetchAll());
+}
+
+// Cancel (hard-delete) a booking. Availability is derived from this table
+// (ADR-0001), so the freed hours become bookable again. Returns whether a row
+// was removed.
+function cancelBooking(PDO $pdo, int $id): bool
+{
+    $stmt = $pdo->prepare('DELETE FROM bookings WHERE id = ?');
+    $stmt->execute([$id]);
+    return $stmt->rowCount() > 0;
+}
+
 // Shape a raw booking row into the API representation with a computed price.
 function formatBooking(array $row): array
 {
