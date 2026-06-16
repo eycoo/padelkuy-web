@@ -80,4 +80,37 @@ final class BookingAdminTest extends TestCase
     {
         $this->assertFalse(cancelBooking($this->pdo, 999999));
     }
+
+    public function test_admin_cancel_of_a_paid_booking_refunds_it_regardless_of_age(): void
+    {
+        $bid = createBooking($this->pdo, 1, 1, $this->date, 8, 10);
+        payForBooking($this->pdo, 1, $bid);
+        // Older than the customer 5-minute window — admin has no window.
+        $this->pdo->exec("UPDATE payments SET paid_at = NOW() - INTERVAL 60 MINUTE WHERE booking_id = $bid");
+
+        $this->assertTrue(adminCancelBooking($this->pdo, $bid));
+
+        $row = array_values(array_filter(listAllBookings($this->pdo), fn($r) => $r['id'] === $bid))[0];
+        $this->assertSame('cancelled', $row['status']);
+        $this->assertSame('refunded', $row['payment_status']);
+    }
+
+    public function test_admin_cancel_of_an_unpaid_booking_is_a_plain_soft_cancel(): void
+    {
+        $bid = createBooking($this->pdo, 1, 1, $this->date, 8, 10);
+
+        $this->assertTrue(adminCancelBooking($this->pdo, $bid));
+        $this->assertSame('cancelled', getBooking($this->pdo, $bid)['status']);
+    }
+
+    public function test_list_includes_code_status_and_payment_status(): void
+    {
+        $bid = createBooking($this->pdo, 1, 1, $this->date, 8, 9);
+        payForBooking($this->pdo, 1, $bid);
+
+        $all = listAllBookings($this->pdo);
+        $this->assertMatchesRegularExpression('/^PDL-\d{4,}$/', $all[0]['code']);
+        $this->assertSame('paid', $all[0]['status']);
+        $this->assertSame('paid', $all[0]['payment_status']);
+    }
 }
