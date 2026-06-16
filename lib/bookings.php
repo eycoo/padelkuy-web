@@ -14,6 +14,9 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         throw new InvalidArgumentException('date must be YYYY-MM-DD');
     }
+    if ($date < date('Y-m-d')) {
+        throw new InvalidArgumentException('cannot book a date in the past');
+    }
     if ($start >= $end) {
         throw new InvalidArgumentException('end_hour must be after start_hour');
     }
@@ -25,9 +28,10 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
     try {
         // Lock matching rows so a concurrent booking can't slip past the check.
         $stmt = $pdo->prepare(
-            'SELECT id FROM bookings
+            "SELECT id FROM bookings
              WHERE court_id = ? AND date = ? AND start_hour < ? AND end_hour > ?
-             FOR UPDATE'
+               AND status IN ('pending','paid')
+             FOR UPDATE"
         );
         $stmt->execute([$court_id, $date, $end, $start]);
 
@@ -42,6 +46,10 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
         );
         $ins->execute([$court_id, $user_id, $date, $start, $end]);
         $id = (int) $pdo->lastInsertId();
+
+        // Booking code is derived from the id (unique by construction).
+        $pdo->prepare('UPDATE bookings SET code = ? WHERE id = ?')
+            ->execute([sprintf('PDL-%04d', $id), $id]);
 
         $pdo->commit();
         return $id;
@@ -59,7 +67,7 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
 function getBooking(PDO $pdo, int $id): ?array
 {
     $stmt = $pdo->prepare(
-        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour,
+        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour
          FROM bookings b
          JOIN courts c ON c.id = b.court_id
@@ -78,7 +86,7 @@ function getBooking(PDO $pdo, int $id): ?array
 function listUserBookings(PDO $pdo, int $user_id): array
 {
     $stmt = $pdo->prepare(
-        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour,
+        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour
          FROM bookings b
          JOIN courts c ON c.id = b.court_id
@@ -108,7 +116,7 @@ function listAllBookings(PDO $pdo, array $filters = []): array
     $clause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
     $stmt = $pdo->prepare(
-        "SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour,
+        "SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour,
                 u.name AS user_name
          FROM bookings b
@@ -127,12 +135,15 @@ function listAllBookings(PDO $pdo, array $filters = []): array
     }, $stmt->fetchAll());
 }
 
-// Cancel (hard-delete) a booking. Availability is derived from this table
-// (ADR-0001), so the freed hours become bookable again. Returns whether a row
-// was removed.
+// Cancel a booking with a soft status change (ADR-0003) — the row persists so
+// the admin view and any refund record survive. A cancelled booking no longer
+// holds its slots (see the active-status filter in availability/overlap).
+// Returns whether a booking moved to cancelled (false if missing or already so).
 function cancelBooking(PDO $pdo, int $id): bool
 {
-    $stmt = $pdo->prepare('DELETE FROM bookings WHERE id = ?');
+    $stmt = $pdo->prepare(
+        "UPDATE bookings SET status = 'cancelled' WHERE id = ? AND status <> 'cancelled'"
+    );
     $stmt->execute([$id]);
     return $stmt->rowCount() > 0;
 }
@@ -143,6 +154,8 @@ function formatBooking(array $row): array
     $hours = (int) $row['end_hour'] - (int) $row['start_hour'];
     return [
         'id'         => (int) $row['id'],
+        'code'       => $row['code'] ?? null,
+        'status'     => $row['status'] ?? null,
         'venue_name' => $row['venue_name'],
         'court_label' => $row['court_label'],
         'date'       => $row['date'],

@@ -29,10 +29,12 @@ erDiagram
 
     BOOKINGS {
         int id PK
+        varchar code UK "PDL-0001"
         int court_id FK
         int user_id FK
         date date
         int start_hour "7..20"
         int end_hour "exclusive"
+        enum status "pending|paid|expired|cancelled"
         timestamp created_at
     }
