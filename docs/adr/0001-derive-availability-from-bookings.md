@@ -9,3 +9,5 @@ A pre-generated `slots` table (one row per court/date/hour with a status) was re
 ## Consequences
 
 No simple unique constraint guards against double-booking — the overlap check must run inside the insert (ideally a transaction) or two concurrent range bookings could both succeed. If per-slot pricing or manual blocking is ever needed, this decision must be revisited.
+
+Amended by ADR-0003: availability and the overlap check now consider only bookings that are `paid` or unexpired `pending`; `expired` and `cancelled` bookings no longer hold their slots.
