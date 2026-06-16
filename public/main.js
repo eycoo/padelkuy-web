@@ -98,3 +98,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+// venue render API & Auth State
+document.addEventListener('DOMContentLoaded', () => {
+    const venueGrid = document.querySelector('.venue-grid');
+    const cityFilter = document.getElementById('city-filter');
+    const searchBtn = document.getElementById('search-btn');
+    const navActions = document.getElementById('nav-actions');
+
+    // Cek status login statis untuk testing
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'; 
+
+    if (navActions) {
+        // SVG Ikon Tiket 
+        const ticketIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2" ry="2"></rect><path d="M12 7v10"></path><path d="M6 7v10"></path><path d="M18 7v10"></path></svg>`;
+
+        if (isLoggedIn) {
+            // Render jika sudah login (Nama Profil & Tiket dengan Notif)
+            navActions.innerHTML = `
+                <span class="profile-name">Nama_Profile</span>
+                <a href="riwayat.html" class="ticket-icon-wrapper" title="Riwayat Pesanan">
+                    ${ticketIconSVG}
+                    <span class="notif-badge"></span>
+                </a>
+            `;
+        } else {
+            // Render jika belum login (Login & Register menjadi Button terpisah)
+            navActions.innerHTML = `
+                <a href="login.html" class="nav-btn btn-login">Login</a>
+                <a href="register.html" class="nav-btn btn-register">Register</a>
+                <a href="login.html" class="ticket-icon-wrapper" title="Masuk untuk melihat tiket">
+                    ${ticketIconSVG}
+                </a>
+            `;
+        }
+    }
+
+    if (!venueGrid) return;
+
+    const fetchVenues = async (city = '') => {
+        try {
+            const url = city ? `/api/venues.php?city=${city}` : '/api/venues.php';
+            const response = await fetch(url);
+            const venues = await response.json();
+            renderVenues(venues);
+        } catch (error) {
+            venueGrid.innerHTML = '<p class="empty-state">Gagal memuat data venue dari server.</p>';
+        }
+    };
+
+    const renderVenues = (venues) => {
+        if (venues.length === 0) {
+            venueGrid.innerHTML = '<p class="empty-state">Maaf, belum ada venue tersedia di kota ini.</p>';
+            return;
+        }
+
+        venueGrid.innerHTML = venues.map(v => {
+            const priceK = v.price_per_hour / 1000;
+            // Pengalihan url pemesanan
+            const targetUrl = isLoggedIn ? `detail.html?id=${v.id}` : `login.html`;
+            
+            return `
+            <div class="court-card">
+                <div class="court-image">
+                    <img src="${v.image_path}" alt="${v.name}">
+                </div>
+                <div class="court-body">
+                    <h3>${v.name}</h3>
+                    <span class="court-tag">${v.city}</span>
+                    <div class="court-foot">
+                        <div class="price">Rp ${priceK}k <small>/ hr</small></div>
+                        <a href="${targetUrl}" class="btn btn-primary">Book Now</a>
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    };
+
+    searchBtn.addEventListener('click', () => {
+        fetchVenues(cityFilter.value);
+    });
+
+    fetchVenues();
+});
