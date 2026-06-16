@@ -5,6 +5,21 @@
 const OPEN_HOUR  = 7;   // first bookable start hour
 const CLOSE_HOUR = 20;  // last bookable start hour (the 20:00 slot covers 20-21)
 
+// An unpaid booking is held for this long before it expires (ADR-0003).
+const PENDING_EXPIRY_MINUTES = 15;
+
+// Lazy expiry (ADR-0003): there is no cron, so unpaid `pending` bookings older
+// than the window are swept to `expired` before any availability or booking
+// read, keeping the stored status truthful. Paid bookings never expire.
+function expireStalePendingBookings(PDO $pdo): void
+{
+    $pdo->exec(
+        "UPDATE bookings SET status = 'expired'
+         WHERE status = 'pending'
+           AND created_at < (NOW() - INTERVAL " . PENDING_EXPIRY_MINUTES . " MINUTE)"
+    );
+}
+
 // All bookable start hours of a day.
 function operating_hours(): array
 {
@@ -15,6 +30,8 @@ function operating_hours(): array
 // booking on that court and date covers it (start_hour <= hour < end_hour).
 function getAvailability(PDO $pdo, int $court_id, string $date): array
 {
+    expireStalePendingBookings($pdo);
+
     // Only active bookings hold a slot (ADR-0003); cancelled/expired do not.
     $stmt = $pdo->prepare(
         "SELECT start_hour, end_hour FROM bookings
