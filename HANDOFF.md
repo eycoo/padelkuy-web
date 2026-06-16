@@ -6,8 +6,12 @@ Pick-up doc for whoever continues this project (frontend: Royan; or a fresh agen
 
 PadelKuy is being turned from a static demo into a working full-stack booking app.
 **Customer backend is done and merged to `master`.** Frontend is filed as issues #14–#18.
-**Admin backend (venues/courts CRUD + all-bookings oversight) is built and tested** on
-branch `feat/admin-auth` (PRD #19, BE issues #20–#23); its frontend is #24–#26.
+**Admin backend (venues/courts CRUD + all-bookings oversight) is done and merged**
+(PRD #19, BE issues #20–#23); its frontend is #24–#26.
+**The booking payment lifecycle backend is done and merged** (ADR-0003, BE issues
+#28–#32): bookings now have a status (`pending`/`paid`/`expired`/`cancelled`) and a
+human-readable code, payment is simulated, and refunds are timed. Its frontend is
+#33–#35.
 
 - **Stack:** native PHP + MySQL, no fullstack framework, no Node/TypeScript (course constraint). Backend is a JSON API; frontend is plain HTML/CSS/JS calling it with `fetch()`. See `docs/adr/0002-...`.
 - **Default branch is `master`** (the real history). `main` is an unrelated 2-commit stub — ignore it.
@@ -20,10 +24,11 @@ public/            web root (serve this dir)
   api/             JSON endpoints (done); api/admin/ = admin-only endpoints
 lib/               domain logic — http, session, auth, venues, courts, availability, bookings
 config/db.php      PDO connection (env-overridable)
-tests/             PHPUnit (44 tests, all green)
+tests/             PHPUnit (64 tests, all green)
 schema.sql seed.sql
-CONTEXT.md         domain glossary (Venue / Court / Slot / Booking)
-docs/adr/          0001 derive-availability, 0002 json-api
+CONTEXT.md         domain glossary (Customer / Admin / Venue / Court / Slot / Booking / Booking code / Payment / Refund)
+docs/adr/          0001 derive-availability, 0002 json-api, 0003 booking-payment-lifecycle
+docs/erd.png       rendered ERD (source docs/erd.mmd); regenerate after schema changes
 ```
 
 `lib/`, `config/`, `tests/`, `*.sql` live **outside** `public/` on purpose — DB creds must not be web-servable.
@@ -54,8 +59,10 @@ DB connection defaults: host `127.0.0.1`, db `padelkuy`, user `root`, no passwor
 | `POST /api/register.php` | `{name,email,password}` | `201 {id}` | `409` dup email · `422` invalid |
 | `POST /api/login.php` | `{email,password}` | `200 {id,name,email,role}` + session cookie | `401` |
 | `POST /api/logout.php` | — | `200 {ok:true}` | — |
-| `POST /api/bookings.php` | `{court_id,date,start_hour,end_hour}` | `201 {id,venue_name,court_label,date,start_hour,end_hour,hours,price}` | `401` · `409` overlap · `422` |
-| `GET /api/bookings.php` | — (session) | `[{...booking, hours, price}]` | `401` |
+| `POST /api/bookings.php` | `{court_id,date,start_hour,end_hour}` | `201 {id,code,status,venue_name,court_label,date,start_hour,end_hour,hours,price}` | `401` · `409` overlap · `422` (incl. past date) |
+| `GET /api/bookings.php` | — (session) | `[{...booking, code, status, hours, price}]` | `401` |
+| `POST /api/payments.php` | `{booking_id}` | `201 {id,booking_id,amount,status,paid_at,refunded_at}` (settles a pending booking) | `401` · `403` not owner · `404` · `422` not payable/expired |
+| `POST /api/cancel.php` | `{booking_id}` | `200 {…payment, status:"refunded"}` (self-cancel paid booking inside the 5-min window) | `401` · `403` not owner / window closed · `404` · `422` not a paid booking |
 
 Frontend must send `Content-Type: application/json` and include credentials so the PHP session cookie is stored/sent.
 
@@ -74,13 +81,14 @@ Frontend must send `Content-Type: application/json` and include credentials so t
 | `GET /api/admin/courts.php?venue_id=N` | — | `[{id,venue_id,label}]` | `422` |
 | `POST /api/admin/courts.php` | `{venue_id,label}` | `201 {id}` | `422` |
 | `DELETE /api/admin/courts.php?id=N` | — | `200 {ok:true}` (cascades bookings) | `404` |
-| `GET /api/admin/bookings.php[?venue_id=N][&date=YYYY-MM-DD]` | — | `[{...booking, user_name}]` (all users) | `403/401` |
-| `DELETE /api/admin/bookings.php?id=N` | — | `200 {ok:true}` (frees the slot) | `404` |
+| `GET /api/admin/bookings.php[?venue_id=N][&date=YYYY-MM-DD]` | — | `[{...booking, code, status, user_name, payment_status}]` (all users) | `403/401` |
+| `DELETE /api/admin/bookings.php?id=N` | — | `200 {ok:true}` (soft-cancel; refunds the payment if the booking was paid, no time limit) | `404` |
 
 ## Key decisions (don't re-litigate without reason)
 
 - **ADR-0001:** availability is *derived* from bookings, no `slots` table. Operating hours fixed 07:00–20:00 (bookable start hours 7..20). A booking is a contiguous range `[start_hour, end_hour)` (end exclusive); conflicts caught by an overlap check in a transaction.
 - **ADR-0002:** JSON API + `public/` web root (not server-rendered) so backend/frontend split cleanly by role.
+- **ADR-0003:** booking payment lifecycle. A booking starts `pending` and **holds its slots**; availability and the overlap check count only `pending`/`paid` bookings, so `expired`/`cancelled` free their slots. Unpaid `pending` bookings are swept to `expired` 15 minutes after creation (lazy, on read — no cron). Payment is **simulated** (a `payments` row, `paid`/`refunded`). A customer may self-cancel a `paid` booking within **5 minutes** of paying (refund); after that it is locked and only an admin can cancel (admin cancel always refunds a paid booking). Cancellation is a **soft** status change — rows persist. `createBooking` also rejects past dates.
 - **Glossary (`CONTEXT.md`):** Venue = the place; Court = A/B/C inside it; Slot = one bookable hour; Booking = a user's reservation over a range. Use these words in code/UI.
 
 ## Frontend work (Royan) — issues #14–#18
@@ -103,11 +111,22 @@ All labelled `ready-for-human`, parent #1. Start with #14/#15/#16 (independent),
 | #25 | Venue & court management UI | #24, #21, #22 |
 | #26 | All-bookings table + cancel UI | #24, #23 |
 
-Parent PRD #19. The admin BE (#20–#23) is built on `feat/admin-auth`; merge that first.
+Parent PRD #19. The admin BE (#20–#23) is merged to `master`.
+
+### Payment lifecycle frontend (Royan) — issues #33–#35
+
+| Issue | What | Blocked by |
+|---|---|---|
+| #33 | Payment UI: "Bayar" button + confirmation (extends #17) | #30 (BE, done) |
+| #34 | My Bookings: status + code + cancel/refund within window (extends #18) | #28/#30/#31 (BE, done) |
+| #35 | Admin booking-management page: status + payment status + cancel (extends #26) | #32 (BE, done) |
+
+All BE blockers are merged; these can start whenever Royan picks them up.
 
 ## Open / loose ends
 
-- `feat/admin-auth` (admin backend) is built + green but **not yet merged** — open a PR into `master`.
-- Dev `padelkuy` DB may have leftover smoke-test rows. Reload `schema.sql` + `seed.sql` for clean demo data (seed now includes the admin account).
+- All backend is merged to `master`; the only open work is frontend (Royan): customer #14–#18, admin #24–#26, payment lifecycle #33–#35.
+- The `payments` table is new — reload `schema.sql` (+`seed.sql`) into the dev `padelkuy` DB before a demo so it exists. `tests/bootstrap.php` rebuilds the test DB from `schema.sql` automatically.
+- Regenerate the ERD after any schema change: `npx -y -p @mermaid-js/mermaid-cli mmdc -i docs/erd.mmd -o docs/erd.png -b white --scale 3` (run via `cmd //c` — the bash `npx` is intercepted in this environment).
 - Parent PRDs #1 (customer) and #19 (admin) stay open until their frontends land.
 - Tests target a throwaway `padelkuy_test` DB (auto-created by `tests/bootstrap.php`).
