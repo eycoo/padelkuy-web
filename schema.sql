@@ -5,6 +5,7 @@ CREATE DATABASE IF NOT EXISTS padelkuy
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE padelkuy;
 
+DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS courts;
 DROP TABLE IF EXISTS venues;
@@ -51,4 +52,16 @@ CREATE TABLE bookings (
   FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
   INDEX idx_court_date (court_id, date)
+);
+
+-- A simulated money record, one per booking (ADR-0003). Created when a booking
+-- is paid; moves to 'refunded' if the booking is cancelled within the window.
+CREATE TABLE payments (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  booking_id  INT NOT NULL UNIQUE,
+  amount      INT NOT NULL,                    -- rupiah, = booking price
+  status      ENUM('paid','refunded') NOT NULL DEFAULT 'paid',
+  paid_at     TIMESTAMP NULL,
+  refunded_at TIMESTAMP NULL,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
 );

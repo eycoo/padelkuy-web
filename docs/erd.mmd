@@ -2,6 +2,7 @@ erDiagram
     USERS ||--o{ BOOKINGS : "makes"
     VENUES ||--o{ COURTS : "has"
     COURTS ||--o{ BOOKINGS : "reserved in"
+    BOOKINGS ||--o| PAYMENTS : "paid by"
 
     USERS {
         int id PK
@@ -37,4 +38,13 @@ erDiagram
         int end_hour "exclusive"
         enum status "pending|paid|expired|cancelled"
         timestamp created_at
+    }
+
+    PAYMENTS {
+        int id PK
+        int booking_id FK "UK 1:1"
+        int amount
+        enum status "paid|refunded"
+        timestamp paid_at
+        timestamp refunded_at
     }
