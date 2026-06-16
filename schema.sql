@@ -45,6 +45,8 @@ CREATE TABLE bookings (
   date       DATE      NOT NULL,
   start_hour INT       NOT NULL,                  -- 7..20, inclusive start
   end_hour   INT       NOT NULL,                  -- exclusive end, > start_hour
+  status     ENUM('pending','paid','expired','cancelled') NOT NULL DEFAULT 'pending',
+  code       VARCHAR(20) UNIQUE,                  -- human-readable ref, e.g. PDL-0001
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,

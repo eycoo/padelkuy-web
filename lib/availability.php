@@ -15,8 +15,10 @@ function operating_hours(): array
 // booking on that court and date covers it (start_hour <= hour < end_hour).
 function getAvailability(PDO $pdo, int $court_id, string $date): array
 {
+    // Only active bookings hold a slot (ADR-0003); cancelled/expired do not.
     $stmt = $pdo->prepare(
-        'SELECT start_hour, end_hour FROM bookings WHERE court_id = ? AND date = ?'
+        "SELECT start_hour, end_hour FROM bookings
+         WHERE court_id = ? AND date = ? AND status IN ('pending','paid')"
     );
     $stmt->execute([$court_id, $date]);
     $bookings = $stmt->fetchAll();

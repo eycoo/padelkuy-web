@@ -1,0 +1,40 @@
+erDiagram
+    USERS ||--o{ BOOKINGS : "makes"
+    VENUES ||--o{ COURTS : "has"
+    COURTS ||--o{ BOOKINGS : "reserved in"
+
+    USERS {
+        int id PK
+        varchar name
+        varchar email UK
+        varchar password_hash
+        enum role "user|admin"
+        timestamp created_at
+    }
+
+    VENUES {
+        int id PK
+        varchar name
+        varchar city
+        int price_per_hour
+        varchar tag
+        varchar image_path
+    }
+
+    COURTS {
+        int id PK
+        int venue_id FK
+        varchar label "A,B,C"
+    }
+
+    BOOKINGS {
+        int id PK
+        varchar code UK "PDL-0001"
+        int court_id FK
+        int user_id FK
+        date date
+        int start_hour "7..20"
+        int end_hour "exclusive"
+        enum status "pending|paid|expired|cancelled"
+        timestamp created_at
+    }
