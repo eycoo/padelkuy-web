@@ -100,8 +100,32 @@ function cancelOwnBookingWithRefund(PDO $pdo, int $user_id, int $booking_id): ar
     return refundBookingPayment($pdo, $booking_id, (int) $row['payment_id']);
 }
 
+// Admin override: cancel any booking at any time (no refund window). If the
+// booking was paid, its payment is refunded; otherwise it is a plain
+// soft-cancel. Returns false if the booking is missing or already cancelled.
+function adminCancelBooking(PDO $pdo, int $booking_id): bool
+{
+    $stmt = $pdo->prepare(
+        "SELECT b.status AS booking_status, p.id AS payment_id, p.status AS payment_status
+         FROM bookings b
+         LEFT JOIN payments p ON p.booking_id = b.id
+         WHERE b.id = ?"
+    );
+    $stmt->execute([$booking_id]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        return false;
+    }
+    if ($row['booking_status'] === 'paid' && $row['payment_id'] !== null && $row['payment_status'] === 'paid') {
+        refundBookingPayment($pdo, $booking_id, (int) $row['payment_id']);
+        return true;
+    }
+    return cancelBooking($pdo, $booking_id);
+}
+
 // Cancel a booking and refund its payment in one transaction. Shared by the
-// customer refund path and (later) the admin override.
+// customer refund path and the admin override.
 function refundBookingPayment(PDO $pdo, int $booking_id, int $payment_id): array
 {
     $pdo->beginTransaction();
