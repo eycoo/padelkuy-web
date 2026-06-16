@@ -6,8 +6,14 @@ require_once __DIR__ . '/availability.php';
 require_once __DIR__ . '/bookings.php';
 
 class PaymentException extends RuntimeException {}
-class NotBookingOwnerException extends PaymentException {}   // 403
-class BookingNotPayableException extends PaymentException {} // 422
+class NotBookingOwnerException extends PaymentException {}    // 403
+class BookingNotPayableException extends PaymentException {}  // 422
+class NotRefundableException extends PaymentException {}      // 422 (not a paid booking)
+class RefundWindowClosedException extends PaymentException {} // 403 (past the window)
+
+// A customer may self-cancel a paid booking only within this many minutes of
+// paying (ADR-0003). After that it is locked to the customer; admins override.
+const REFUND_WINDOW_MINUTES = 5;
 
 // Pay for a pending booking owned by $user_id. Returns the created Payment.
 // Throws InvalidArgumentException if the booking is missing,
@@ -57,6 +63,60 @@ function payForBooking(PDO $pdo, int $user_id, int $booking_id): array
         throw $e;
     }
 
+    return getPayment($pdo, $payment_id);
+}
+
+// Customer self-cancel of their own paid booking, refunding it, but only
+// within the refund window (ADR-0003). Cancels the booking, refunds the
+// payment, and frees the slots. Throws NotBookingOwnerException for someone
+// else's booking, NotRefundableException if it isn't a paid booking, and
+// RefundWindowClosedException once the window has passed.
+function cancelOwnBookingWithRefund(PDO $pdo, int $user_id, int $booking_id): array
+{
+    $stmt = $pdo->prepare(
+        "SELECT b.user_id, b.status AS booking_status,
+                p.id AS payment_id,
+                (p.paid_at < (NOW() - INTERVAL " . REFUND_WINDOW_MINUTES . " MINUTE)) AS window_closed
+         FROM bookings b
+         LEFT JOIN payments p ON p.booking_id = b.id
+         WHERE b.id = ?"
+    );
+    $stmt->execute([$booking_id]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        throw new InvalidArgumentException('booking not found');
+    }
+    if ((int) $row['user_id'] !== $user_id) {
+        throw new NotBookingOwnerException('not your booking');
+    }
+    if ($row['booking_status'] !== 'paid' || $row['payment_id'] === null) {
+        throw new NotRefundableException('booking is not a paid booking');
+    }
+    if ((int) $row['window_closed'] === 1) {
+        throw new RefundWindowClosedException('refund window has closed');
+    }
+
+    return refundBookingPayment($pdo, $booking_id, (int) $row['payment_id']);
+}
+
+// Cancel a booking and refund its payment in one transaction. Shared by the
+// customer refund path and (later) the admin override.
+function refundBookingPayment(PDO $pdo, int $booking_id, int $payment_id): array
+{
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = ?")
+            ->execute([$booking_id]);
+        $pdo->prepare("UPDATE payments SET status = 'refunded', refunded_at = NOW() WHERE id = ?")
+            ->execute([$payment_id]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
     return getPayment($pdo, $payment_id);
 }
 
