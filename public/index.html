@@ -9,117 +9,57 @@
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="logo">Padel<span>Kuy</span></div>
-  </nav>
+    <nav class="navbar">
+        <div class="logo">Padel<span>Kuy</span></div>
+        <div id="nav-menu" class="nav-menu"></div>
+        <div id="nav-actions" class="login-register">
+        <a href="login.html" class="btn">Login</a>
+        <a href="register.html" class="btn">Register</a>
+        </div>
+    </nav>
 
-  <section class="hero">
-    <h1>Book your padel court in <em>seconds</em>, not hours.</h1>
-    <p>Find open slots near you, lock in your time, and just show up. No phone calls, no group chats.</p>
-
-    <div class="search-bar">
-      <div class="search-field">
-        <label for="loc">Location</label>
-        <select id="loc">
-          <option value="" disabled selected>Pilih kota...</option>
-          <option>Jakarta Selatan</option>
-          <option>Jakarta Pusat</option>
-          <option>Jakarta Barat</option>
-          <option>Jakarta Utara</option>
-          <option>Bandung</option>
-          <option>Bali</option>
-          <option>Surabaya</option>
-          <option>Yogyakarta</option>
-        </select>
-      </div>
-
-      <div class="search-field" id="date-picker-wrapper">
-        <label>Date</label>
-        <div id="date-display" class="custom-select-display">Pilih tanggal...</div>
-        <input type="hidden" id="selected-date" name="date">
-
-        <div id="custom-calendar-popup" class="calendar-popup">
-          <div class="calendar-head">
-            <h4 id="kalender-bulan-tahun">April 2026</h4>
-            <div class="calendar-nav">
-              <button type="button" id="prev-month">‹</button>
-              <button type="button" id="next-month">›</button>
-            </div>
+  <header class="hero">
+        <h1>Book your padel court in seconds, not hours.</h1>
+        <p>Find open slots near you, lock in your time, and just show up. No phone calls, no group chats.</p>
+        
+      <div class="search-bar">
+          <div class="input-group location-group">
+              <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              
+              <select id="city-filter">
+                  <option value="">Pilih Kota Lokasi...</option>
+                  <option value="Jakarta">Jakarta</option>
+                  <option value="Surabaya">Surabaya</option>
+              </select>
           </div>
-          <div class="calendar" id="kalender-grid">
+        
+          <div class="input-group date-group" id="date-picker-wrapper">
+              <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              
+              <div id="date-display" class="date-placeholder">Pilih Tanggal Bermain...</div>
+              <input type="hidden" id="selected-date">
+              
+              <div id="custom-calendar-popup" class="calendar-popup">
+                  <div class="calendar-header">
+                      <button id="prev-month">&lt;</button>
+                      <span id="kalender-bulan-tahun"></span>
+                      <button id="next-month">&gt;</button>
+                  </div>
+                  <div id="kalender-grid" class="calendar-grid"></div>
+              </div>
           </div>
-        </div>
+        
+          <button id="search-btn">Search</button>
       </div>
-      <a href="#courts" class="btn btn-primary">Search Courts</a>
-    </div>
-  </section>
+    </header>
 
-  <section id="courts" class="courts">
-    <div class="courts-header">
-      <h2>Available Courts</h2>
-      <a href="#" class="link">See all →</a>
-    </div>
-
-    <div class="court-grid">
-
-      <div class="court-card">
-        <div class="court-image">
-          <img src="assets/images/court-1-image.jpeg" alt="the G club Padel">
-        </div>
-        <div class="court-body">
-          <h3>the G club Padel</h3>
-          <span class="court-tag">Glass walls · Premium turf</span>
-          <div class="court-foot">
-            <div class="price">Rp 180k <small>/ hr</small></div>
-            <a href="detail.html#court-1" class="btn btn-primary">Book Now</a>
-          </div>
-        </div>
+  <main>
+      <div class="section-header">
+          <h2>Venue Tersedia</h2>
+          <a href="#">Lihat semua -</a>
       </div>
-
-      <div class="court-card">
-        <div class="court-image">
-          <img src="assets/images/court-2-image.jpeg" alt="Fote padel and space">
-        </div>
-        <div class="court-body">
-          <h3>Fote padel and space</h3>
-          <span class="court-tag">Open air · Night lights</span>
-          <div class="court-foot">
-            <div class="price">Rp 150k <small>/ hr</small></div>
-            <a href="detail.html#court-2" class="btn btn-primary">Book Now</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="court-card">
-        <div class="court-image">
-          <img src="assets/images/court-3-image.jpeg" alt="Padel First">
-        </div>
-        <div class="court-body">
-          <h3>Padel First</h3>
-          <span class="court-tag">AC · Spectator seats</span>
-          <div class="court-foot">
-            <div class="price">Rp 200k <small>/ hr</small></div>
-            <a href="detail.html#court-3" class="btn btn-primary">Book Now</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="court-card">
-        <div class="court-image">
-          <img src="assets/images/court-4-image.jpeg" alt="Hobi Padl">
-        </div>
-        <div class="court-body">
-          <h3>Hobi Padl</h3>
-          <span class="court-tag">City view · Outdoor</span>
-          <div class="court-foot">
-            <div class="price">Rp 170k <small>/ hr</small></div>
-            <a href="detail.html#court-4" class="btn btn-primary">Book Now</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
+      <div class="venue-grid"></div>
+  </main>
 
   <footer class="footer">
     <div>© 2026 PadelKuy</div>
