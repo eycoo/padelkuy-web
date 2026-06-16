@@ -24,6 +24,9 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
         throw new InvalidArgumentException('booking is outside operating hours');
     }
 
+    // Free any expired holds so a stale pending booking can't block a new one.
+    expireStalePendingBookings($pdo);
+
     $pdo->beginTransaction();
     try {
         // Lock matching rows so a concurrent booking can't slip past the check.
@@ -85,6 +88,8 @@ function getBooking(PDO $pdo, int $id): ?array
 // All bookings owned by a user, newest date first, with labels and price.
 function listUserBookings(PDO $pdo, int $user_id): array
 {
+    expireStalePendingBookings($pdo);
+
     $stmt = $pdo->prepare(
         'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour
@@ -102,6 +107,8 @@ function listUserBookings(PDO $pdo, int $user_id): array
 // booker's name. Optional filters: 'venue_id' (int) and 'date' (YYYY-MM-DD).
 function listAllBookings(PDO $pdo, array $filters = []): array
 {
+    expireStalePendingBookings($pdo);
+
     $where = [];
     $args  = [];
 
