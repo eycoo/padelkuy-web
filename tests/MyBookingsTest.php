@@ -5,11 +5,12 @@ use PHPUnit\Framework\TestCase;
 final class MyBookingsTest extends TestCase
 {
     private PDO $pdo;
-    private const DATE = '2026-06-10';
+    private string $date;
 
     protected function setUp(): void
     {
         $this->pdo = db();
+        $this->date = date('Y-m-d', strtotime('+7 days'));
         $this->pdo->exec('DELETE FROM bookings');
         $this->pdo->exec('DELETE FROM courts');
         $this->pdo->exec('DELETE FROM venues');
@@ -22,8 +23,8 @@ final class MyBookingsTest extends TestCase
 
     public function test_returns_only_the_users_own_bookings(): void
     {
-        createBooking($this->pdo, 1, 1, self::DATE, 8, 9);   // Alice
-        createBooking($this->pdo, 2, 1, self::DATE, 10, 11); // Bob
+        createBooking($this->pdo, 1, 1, $this->date, 8, 9);   // Alice
+        createBooking($this->pdo, 2, 1, $this->date, 10, 11); // Bob
 
         $mine = listUserBookings($this->pdo, 1);
         $this->assertCount(1, $mine);
@@ -38,7 +39,7 @@ final class MyBookingsTest extends TestCase
 
     public function test_includes_venue_and_court_labels(): void
     {
-        createBooking($this->pdo, 1, 1, self::DATE, 8, 9);
+        createBooking($this->pdo, 1, 1, $this->date, 8, 9);
         $mine = listUserBookings($this->pdo, 1);
         $this->assertSame('Test Venue', $mine[0]['venue_name']);
         $this->assertSame('A', $mine[0]['court_label']);
