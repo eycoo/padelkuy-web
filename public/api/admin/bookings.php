@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../lib/http.php';
 require_once __DIR__ . '/../../../lib/auth.php';
 require_once __DIR__ . '/../../../lib/session.php';
 require_once __DIR__ . '/../../../lib/bookings.php';
+require_once __DIR__ . '/../../../lib/payments.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 require_admin(db());
@@ -30,7 +31,7 @@ try {
                 send_error('id is required', 422);
                 return;
             }
-            cancelBooking(db(), $id)
+            adminCancelBooking(db(), $id)
                 ? send_json(['ok' => true])
                 : send_error('Booking not found', 404);
             return;

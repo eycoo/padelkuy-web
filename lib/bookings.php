@@ -125,11 +125,12 @@ function listAllBookings(PDO $pdo, array $filters = []): array
     $stmt = $pdo->prepare(
         "SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour,
-                u.name AS user_name
+                u.name AS user_name, p.status AS payment_status
          FROM bookings b
          JOIN courts c ON c.id = b.court_id
          JOIN venues v ON v.id = c.venue_id
          JOIN users  u ON u.id = b.user_id
+         LEFT JOIN payments p ON p.booking_id = b.id
          $clause
          ORDER BY b.date DESC, b.start_hour ASC"
     );
@@ -138,6 +139,7 @@ function listAllBookings(PDO $pdo, array $filters = []): array
     return array_map(function (array $row) {
         $out = formatBooking($row);
         $out['user_name'] = $row['user_name'];
+        $out['payment_status'] = $row['payment_status'];
         return $out;
     }, $stmt->fetchAll());
 }
