@@ -10,5 +10,9 @@ phpunit.phar
 # Local env overrides
 .env
 
+
 # Agent scratch (issue/PRD drafts)
 .scratch/
+
+# Local-only tooling config (kept on disk, not tracked)
+CLAUDE.md
