@@ -16,3 +16,4 @@ phpunit.phar
 
 # Local-only tooling config (kept on disk, not tracked)
 CLAUDE.md
+docs/agents/
