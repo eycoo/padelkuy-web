@@ -17,6 +17,11 @@ a customer downloads a generated-on-demand PDF receipt for a paid booking from
 their order history (`GET /api/receipt.php`); also satisfies the "reporting PDF"
 deliverable. **The customer frontend (Royan's `frontend` branch) has been merged
 to `master`** — homepage, detail, login/register, and order history now call the API.
+**The admin-editor backend gaps the FE needed are now filled** (ADR-0005, issues
+#43–#51): venue About/`description`, facility chips, main image + detail gallery,
+court type, per-court schedules (day-band hours + pricing, driving availability
+with a flat-grid fallback), admin booking status filter + pagination, a
+transactional bulk venue save, and an image-upload endpoint.
 
 - **Stack:** native PHP + MySQL, no fullstack framework, no Node/TypeScript (course constraint). Backend is a JSON API; frontend is plain HTML/CSS/JS calling it with `fetch()`. See `docs/adr/0002-...`.
 - **Default branch is `master`** (the real history). `main` is an unrelated 2-commit stub — ignore it.
@@ -27,12 +32,14 @@ to `master`** — homepage, detail, login/register, and order history now call t
 public/            web root (serve this dir)
   index.html detail.html main.js css/ assets/   frontend (Royan)
   api/             JSON endpoints (done); api/admin/ = admin-only endpoints
-lib/               domain logic — http, session, auth, venues, courts, availability, bookings
+lib/               domain logic — http, session, auth, venues, venue_save, courts,
+                   schedules, availability, bookings, payments, receipt, uploads
 config/db.php      PDO connection (env-overridable)
-tests/             PHPUnit (69 tests, all green)
+tests/             PHPUnit (113 tests, all green)
 schema.sql seed.sql              (+ schema.railway.sql / seed.railway.sql for managed hosts)
 CONTEXT.md         domain glossary (Customer / Admin / Venue / Court / Slot / Booking / Booking code / Payment / Refund)
-docs/adr/          0001 derive-availability, 0002 json-api, 0003 booking-payment-lifecycle, 0004 pdf-payment-receipt
+docs/adr/          0001 derive-availability, 0002 json-api, 0003 booking-payment-lifecycle,
+                   0004 pdf-payment-receipt, 0005 court-schedules-and-venue-detail
 docs/erd.png       rendered ERD (source docs/erd.mmd); regenerate after schema changes
 ```
 
@@ -80,14 +87,19 @@ Frontend must send `Content-Type: application/json` and include credentials so t
 
 | Method + path | Body | Success | Errors |
 |---|---|---|---|
-| `GET /api/admin/venues.php[?id=N]` | — | venue list, or one venue | `404` · `403/401` |
-| `POST /api/admin/venues.php` | `{name,city,price_per_hour,tag?,image_path?}` | `201 {venue}` | `422` · `403/401` |
+| `GET /api/admin/venues.php[?id=N]` | — | venue list, or one venue (incl. `description,main_image_path,facilities[],images[]`) | `404` · `403/401` |
+| `POST /api/admin/venues.php` | `{name,city,price_per_hour,tag?,description?,image_path?,main_image_path?,facilities?[],images?[]}` | `201 {venue}` | `422` · `403/401` |
 | `PUT /api/admin/venues.php?id=N` | same fields | `200 {venue}` | `422` · `404` |
 | `DELETE /api/admin/venues.php?id=N` | — | `200 {ok:true}` (cascades courts/bookings) | `404` |
-| `GET /api/admin/courts.php?venue_id=N` | — | `[{id,venue_id,label}]` | `422` |
-| `POST /api/admin/courts.php` | `{venue_id,label}` | `201 {id}` | `422` |
-| `DELETE /api/admin/courts.php?id=N` | — | `200 {ok:true}` (cascades bookings) | `404` |
-| `GET /api/admin/bookings.php[?venue_id=N][&date=YYYY-MM-DD]` | — | `[{...booking, code, status, user_name, payment_status}]` (all users) | `403/401` |
+| `POST /api/admin/venue_save.php` · `PUT ?id=N` | full bundle (venue + `facilities[]` + `images[]` + `courts[]` w/ nested `schedules[]`) | `201`/`200 {venue, courts:[{…,schedules}]}` (one transaction) | `422` · `404` |
+| `GET /api/admin/courts.php?venue_id=N` | — | `[{id,venue_id,label,type}]` | `422` |
+| `POST /api/admin/courts.php` | `{venue_id,label,type?}` | `201 {id}` | `422` |
+| `PUT /api/admin/courts.php?id=N` | `{label,type?}` | `200 {ok:true}` | `404`·`422` |
+| `DELETE /api/admin/courts.php?id=N` | — | `200 {ok:true}` (cascades bookings/schedules) | `404` |
+| `GET /api/admin/schedules.php?court_id=N` | — | `[{id,court_id,day_band,start_hour,end_hour,price}]` | `422` |
+| `PUT /api/admin/schedules.php?court_id=N` | `{schedules:[{day,start,end,price}]}` (replace-all) | `200 [schedules]` | `422` |
+| `POST /api/admin/upload.php` | multipart field `image` (jpeg/png/webp, ≤5 MB) | `201 {path}` | `422` · `403/401` |
+| `GET /api/admin/bookings.php[?venue_id=][&date=][&status=][&page=N&limit=N]` | — | `[{...booking, code, status, user_name, payment_status}]`; total in `X-Total-Count` header | `403/401` |
 | `DELETE /api/admin/bookings.php?id=N` | — | `200 {ok:true}` (soft-cancel; refunds the payment if the booking was paid, no time limit) | `404` |
 
 ## Key decisions (don't re-litigate without reason)
@@ -95,6 +107,7 @@ Frontend must send `Content-Type: application/json` and include credentials so t
 - **ADR-0001:** availability is *derived* from bookings, no `slots` table. Operating hours fixed 07:00–20:00 (bookable start hours 7..20). A booking is a contiguous range `[start_hour, end_hour)` (end exclusive); conflicts caught by an overlap check in a transaction.
 - **ADR-0002:** JSON API + `public/` web root (not server-rendered) so backend/frontend split cleanly by role.
 - **ADR-0003:** booking payment lifecycle. A booking starts `pending` and **holds its slots**; availability and the overlap check count only `pending`/`paid` bookings, so `expired`/`cancelled` free their slots. Unpaid `pending` bookings are swept to `expired` 15 minutes after creation (lazy, on read — no cron). Payment is **simulated** (a `payments` row, `paid`/`refunded`). A customer may self-cancel a `paid` booking within **5 minutes** of paying (refund); after that it is locked and only an admin can cancel (admin cancel always refunds a paid booking). Cancellation is a **soft** status change — rows persist. `createBooking` also rejects past dates.
+- **ADR-0005:** court **schedules** drive bookable hours + per-hour price (day bands `everyday`/`mon_fri`/`sat_sun`, specific band beats everyday), with a **fallback**: a court with no schedules keeps the fixed 07:00–20:00 grid + flat venue price (so legacy/seed courts and the whole pre-existing suite are unaffected). Booking price stays derived (sum of per-hour rates). Venue detail extras (About, facilities, gallery, court type) are additive columns/child tables; `saveVenueBundle` writes the whole editor in one transaction.
 - **Glossary (`CONTEXT.md`):** Venue = the place; Court = A/B/C inside it; Slot = one bookable hour; Booking = a user's reservation over a range. Use these words in code/UI.
 
 ## Frontend work (Royan) — issues #14–#18

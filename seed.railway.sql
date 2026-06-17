@@ -1,17 +1,23 @@
 -- Seed for managed hosts (Railway/etc): same as seed.sql but WITHOUT `USE`.
 -- Run after schema.railway.sql against the provider's database.
 
-INSERT INTO venues (name, city, price_per_hour, tag, image_path) VALUES
-  ('the G club Padel',      'Jakarta Selatan', 180000, 'Glass walls · Premium turf', 'assets/images/court-1-image.jpeg'),
-  ('Fote padel and space',  'Jakarta Pusat',   150000, 'Open air · Night lights',    'assets/images/court-2-image.jpeg'),
-  ('Padel First',           'Bandung',         200000, 'AC · Spectator seats',       'assets/images/court-3-image.jpeg'),
-  ('Hobi Padl',             'Surabaya',        170000, 'City view · Outdoor',        'assets/images/court-4-image.jpeg');
+INSERT INTO venues (name, city, price_per_hour, tag, description, image_path) VALUES
+  ('the G club Padel',      'Jakarta Selatan', 180000, 'Glass walls · Premium turf', 'Premium padel club with glass-walled courts and pro turf.', 'assets/images/court-1-image.jpeg'),
+  ('Fote padel and space',  'Jakarta Pusat',   150000, 'Open air · Night lights',    'Open-air courts under night lights in central Jakarta.',     'assets/images/court-2-image.jpeg'),
+  ('Padel First',           'Bandung',         200000, 'AC · Spectator seats',       'Air-conditioned indoor courts with spectator seating.',      'assets/images/court-3-image.jpeg'),
+  ('Hobi Padl',             'Surabaya',        170000, 'City view · Outdoor',        'Rooftop outdoor courts with a city view.',                   'assets/images/court-4-image.jpeg');
 
--- Three courts per venue.
+-- Three courts per venue (no schedules -> fixed grid + venue price, ADR-0005).
 INSERT INTO courts (venue_id, label)
 SELECT v.id, c.label
 FROM venues v
 CROSS JOIN (SELECT 'A' AS label UNION ALL SELECT 'B' UNION ALL SELECT 'C') c;
+
+-- A few facility chips per venue.
+INSERT INTO venue_facilities (venue_id, name)
+SELECT v.id, f.name
+FROM venues v
+CROSS JOIN (SELECT 'Shower' AS name UNION ALL SELECT 'Parking' UNION ALL SELECT 'Cafe') f;
 
 -- A seed admin account so the admin panel is reachable after a fresh load.
 -- Login: admin@padelkuy.test / admin123  (change the password in production).
