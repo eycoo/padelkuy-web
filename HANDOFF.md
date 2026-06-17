@@ -148,24 +148,30 @@ All BE blockers are merged; these can start whenever Royan picks them up.
   service on every push to `master` and every PR. `tests/bootstrap.php` builds the
   throwaway `padelkuy_test` DB from `schema.sql`, so nothing extra is needed — keep
   it green before merging.
-- **Deploy (Railway, Docker):** `Dockerfile` is `php:8.2-apache` with the docroot
-  set to `public/` (so `lib/`+`config/` are never web-served) and Apache listening
-  on `$PORT`. `railway.json` builds from it. Connect the repo + add a MySQL plugin,
-  then map its vars to the env the app reads: `DB_HOST/DB_NAME/DB_USER/DB_PASS`
-  (see `config/db.php` — all env-overridable).
-- **Schema on a managed host:** import `schema.railway.sql` then `seed.railway.sql`
-  (the plain `schema.sql`/`seed.sql` carry `CREATE DATABASE`/`USE padelkuy`, which
-  managed providers reject — the `.railway.sql` variants drop those lines).
-- **Auto-update from GitHub:** Railway redeploys on every push to `master` — but
-  only the **code**. The database is NOT migrated automatically. A code-only
-  feature goes live on push; a feature that changes the schema (new column/table)
-  needs its SQL applied to the Railway MySQL by hand, or the deployed code will hit
-  a stale DB (the "Unknown column 'status'" class of error). Keep schema changes
-  in `schema.sql` AND mirror them into `schema.railway.sql`.
+- **Deploy (Railway, Docker):** live at https://web-production-97880.up.railway.app
+  (project `padelkuy`: `web` service + a MySQL 9 service, DB name `railway`).
+  `Dockerfile` is `php:8.2-cli` running the PHP built-in server
+  (`php -S 0.0.0.0:$PORT -t public`) so the docroot is `public/` and `lib/`+`config/`
+  are never web-served. (Apache was abandoned — it crash-looped with "More than one
+  MPM loaded".) The `web` env maps `DB_HOST/DB_NAME/DB_USER/DB_PASS` to the MySQL
+  service vars; read by `config/db.php`.
+- **Redeploy is manual:** a `git push` does NOT trigger a deploy (the GitHub App
+  isn't authorized on the repo). Deploy with **`railway up --service web`** from the
+  repo root — it uploads the working tree and builds in the cloud.
+- **First schema load on the managed DB:** import `schema.railway.sql` then
+  `seed.railway.sql` (the `.railway.sql` variants drop the `CREATE DATABASE`/`USE`
+  lines that managed providers reject).
+- **Schema CHANGES on a DB that already has data:** do NOT re-run
+  `schema.railway.sql` — it `DROP`s every table and wipes the data. Apply an
+  **additive** migration instead (`ALTER TABLE ... ADD COLUMN`, `CREATE TABLE IF NOT
+  EXISTS`), idempotent via `information_schema` checks. The local MariaDB client
+  can't authenticate to MySQL 9 (`caching_sha2_password`), so run the migration with
+  a one-off PHP PDO script over the MySQL service's public TCP proxy. Still keep
+  schema changes in `schema.sql` AND mirror them into `schema.railway.sql`.
 
 ## Open / loose ends
 
-- All backend is merged to `master`; the only open work is frontend (Royan): customer #14–#18, admin #24–#26, payment lifecycle #33–#35.
+- All backend is merged to `master` and **deployed live** — including the admin-editor BE (#43–#51: venue detail, court schedules, bookings paging, bulk save, upload). The Railway DB has been migrated additively for ADR-0005 (no data loss). The only open work is frontend (Royan): customer #14–#18, admin #24–#26, payment lifecycle #33–#35.
 - The `payments` table is new — reload `schema.sql` (+`seed.sql`) into the dev `padelkuy` DB before a demo so it exists. `tests/bootstrap.php` rebuilds the test DB from `schema.sql` automatically.
 - Regenerate the ERD after any schema change: `npx -y -p @mermaid-js/mermaid-cli mmdc -i docs/erd.mmd -o docs/erd.png -b white --scale 3` (run via `cmd //c` — the bash `npx` is intercepted in this environment).
 - Parent PRDs #1 (customer) and #19 (admin) stay open until their frontends land.
