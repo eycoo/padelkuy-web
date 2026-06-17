@@ -7,7 +7,10 @@ USE padelkuy;
 
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS court_schedules;
 DROP TABLE IF EXISTS courts;
+DROP TABLE IF EXISTS venue_images;
+DROP TABLE IF EXISTS venue_facilities;
 DROP TABLE IF EXISTS venues;
 DROP TABLE IF EXISTS users;
 
@@ -21,19 +24,52 @@ CREATE TABLE users (
 );
 
 CREATE TABLE venues (
-  id             INT AUTO_INCREMENT PRIMARY KEY,
-  name           VARCHAR(150) NOT NULL,
-  city           VARCHAR(100) NOT NULL,
-  price_per_hour INT          NOT NULL,           -- rupiah per hour, e.g. 180000
-  tag            VARCHAR(255),
-  image_path     VARCHAR(255)
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  name            VARCHAR(150) NOT NULL,
+  city            VARCHAR(100) NOT NULL,
+  price_per_hour  INT          NOT NULL,          -- rupiah per hour, e.g. 180000
+  tag             VARCHAR(255),
+  description     TEXT,                           -- the "About" blurb (admin editor)
+  image_path      VARCHAR(255),                   -- thumbnail (customer venue cards)
+  main_image_path VARCHAR(255)                    -- hero image on the detail page
+);
+
+-- A venue's facility chips (Shower, Parking, ...). Many per venue.
+CREATE TABLE venue_facilities (
+  id       INT AUTO_INCREMENT PRIMARY KEY,
+  venue_id INT          NOT NULL,
+  name     VARCHAR(100) NOT NULL,
+  FOREIGN KEY (venue_id) REFERENCES venues(id) ON DELETE CASCADE
+);
+
+-- A venue's detail-gallery images, ordered. Thumbnail/main live on venues.
+CREATE TABLE venue_images (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  venue_id   INT          NOT NULL,
+  image_path VARCHAR(255) NOT NULL,
+  sort_order INT          NOT NULL DEFAULT 0,
+  FOREIGN KEY (venue_id) REFERENCES venues(id) ON DELETE CASCADE
 );
 
 CREATE TABLE courts (
   id       INT AUTO_INCREMENT PRIMARY KEY,
-  venue_id INT         NOT NULL,
-  label    VARCHAR(10) NOT NULL,                  -- A, B, C
+  venue_id INT          NOT NULL,
+  label    VARCHAR(100) NOT NULL,                 -- court name, e.g. "Lapangan 1" / A
+  type     ENUM('indoor','outdoor') NOT NULL DEFAULT 'indoor',
   FOREIGN KEY (venue_id) REFERENCES venues(id) ON DELETE CASCADE
+);
+
+-- Per-court bookable hours + price, grouped by day band (ADR-0001 fallback: a
+-- court with no schedules uses the fixed 07:00-20:00 grid and the venue price).
+-- A row covers the hour range [start_hour, end_hour) for the given band.
+CREATE TABLE court_schedules (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  court_id   INT NOT NULL,
+  day_band   ENUM('everyday','mon_fri','sat_sun') NOT NULL DEFAULT 'everyday',
+  start_hour INT NOT NULL,
+  end_hour   INT NOT NULL,                        -- exclusive end, > start_hour
+  price      INT NOT NULL,                        -- rupiah per hour for this band
+  FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE
 );
 
 -- A booking covers a contiguous hour range [start_hour, end_hour) on one court

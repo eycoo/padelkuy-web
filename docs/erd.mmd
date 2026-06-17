@@ -1,6 +1,9 @@
 erDiagram
     USERS ||--o{ BOOKINGS : "makes"
     VENUES ||--o{ COURTS : "has"
+    VENUES ||--o{ VENUE_FACILITIES : "offers"
+    VENUES ||--o{ VENUE_IMAGES : "shows"
+    COURTS ||--o{ COURT_SCHEDULES : "open per"
     COURTS ||--o{ BOOKINGS : "reserved in"
     BOOKINGS ||--o| PAYMENTS : "paid by"
 
@@ -19,13 +22,38 @@ erDiagram
         varchar city
         int price_per_hour
         varchar tag
+        text description "About"
+        varchar image_path "thumbnail"
+        varchar main_image_path "hero"
+    }
+
+    VENUE_FACILITIES {
+        int id PK
+        int venue_id FK
+        varchar name "Shower, Parking, ..."
+    }
+
+    VENUE_IMAGES {
+        int id PK
+        int venue_id FK
         varchar image_path
+        int sort_order
     }
 
     COURTS {
         int id PK
         int venue_id FK
-        varchar label "A,B,C"
+        varchar label "Lapangan 1 / A"
+        enum type "indoor|outdoor"
+    }
+
+    COURT_SCHEDULES {
+        int id PK
+        int court_id FK
+        enum day_band "everyday|mon_fri|sat_sun"
+        int start_hour
+        int end_hour "exclusive"
+        int price "per hour"
     }
 
     BOOKINGS {
