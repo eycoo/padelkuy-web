@@ -221,6 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="booking-footer">
                         <button class="btn-pay" onclick="window.location.href='pembayaran.html?booking_id=${b.id}'">Selesaikan Pembayaran</button>
                     </div>` : ''}
+                    ${b.status === 'paid' ? `
+                    <div class="booking-footer">
+                        <a class="btn-receipt" href="/api/receipt.php?booking_id=${b.id}" target="_blank" rel="noopener">Download Kuitansi</a>
+                    </div>` : ''}
                 </div>
             `;
         }).join('');
