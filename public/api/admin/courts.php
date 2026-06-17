@@ -1,7 +1,8 @@
 <?php
 // Admin court management. All methods require an admin session.
 //   GET    /api/admin/courts.php?venue_id=N   -> that venue's courts
-//   POST   /api/admin/courts.php              body: { venue_id, label }
+//   POST   /api/admin/courts.php              body: { venue_id, label, type? }
+//   PUT    /api/admin/courts.php?id=N         body: { label, type? }
 //   DELETE /api/admin/courts.php?id=N
 require_once __DIR__ . '/../../../config/db.php';
 require_once __DIR__ . '/../../../lib/http.php';
@@ -30,8 +31,20 @@ try {
                 send_error('venue_id is required', 422);
                 return;
             }
-            $id = createCourt(db(), $venueId, (string) ($body['label'] ?? ''));
+            $id = createCourt(db(), $venueId, (string) ($body['label'] ?? ''), (string) ($body['type'] ?? 'indoor'));
             send_json(['id' => $id], 201);
+            return;
+
+        case 'PUT':
+            $id = (int) ($_GET['id'] ?? 0);
+            if ($id <= 0) {
+                send_error('id is required', 422);
+                return;
+            }
+            $body = read_body();
+            updateCourt(db(), $id, (string) ($body['label'] ?? ''), (string) ($body['type'] ?? 'indoor'))
+                ? send_json(['ok' => true])
+                : send_error('Court not found', 404);
             return;
 
         case 'DELETE':
