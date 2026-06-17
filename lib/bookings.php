@@ -232,10 +232,6 @@ function applySchedulePrice(PDO $pdo, array $b): array
     if (empty($b['court_id'])) {
         return $b;
     }
-    $sum = 0;
-    for ($h = (int) $b['start_hour']; $h < (int) $b['end_hour']; $h++) {
-        $sum += priceForHour($pdo, (int) $b['court_id'], (string) $b['date'], $h);
-    }
-    $b['price'] = $sum;
+    $b['price'] = priceForRange($pdo, (int) $b['court_id'], (string) $b['date'], (int) $b['start_hour'], (int) $b['end_hour']);
     return $b;
 }

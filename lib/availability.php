@@ -95,6 +95,19 @@ function priceForHour(PDO $pdo, int $court_id, string $date, int $hour): int
     return (int) $stmt->fetchColumn();
 }
 
+// The price of a booked range [start, end) on a court for a date: the sum of
+// its per-hour rates (#48). The single home for booking-price logic — the
+// booking quote (applySchedulePrice) and the payment amount (payForBooking)
+// both go through here, so a quote and the amount charged can't drift apart.
+function priceForRange(PDO $pdo, int $court_id, string $date, int $start, int $end): int
+{
+    $sum = 0;
+    for ($h = $start; $h < $end; $h++) {
+        $sum += priceForHour($pdo, $court_id, $date, $h);
+    }
+    return $sum;
+}
+
 // The hour grid for one court on one date: each hour flagged taken if any
 // booking on that court and date covers it (start_hour <= hour < end_hour).
 function getAvailability(PDO $pdo, int $court_id, string $date): array

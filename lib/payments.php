@@ -42,13 +42,9 @@ function payForBooking(PDO $pdo, int $user_id, int $booking_id): array
         throw new BookingNotPayableException('booking is not payable');
     }
 
-    // Charge the same schedule-aware price the customer was quoted (#48): sum of
-    // per-hour rates, not the flat venue rate (a court with schedules can price
-    // an hour differently from venue.price_per_hour).
-    $amount = 0;
-    for ($h = (int) $b['start_hour']; $h < (int) $b['end_hour']; $h++) {
-        $amount += priceForHour($pdo, (int) $b['court_id'], (string) $b['date'], $h);
-    }
+    // Charge the same schedule-aware price the customer was quoted (#48), via
+    // the shared priceForRange — quote and amount can't drift.
+    $amount = priceForRange($pdo, (int) $b['court_id'], (string) $b['date'], (int) $b['start_hour'], (int) $b['end_hour']);
 
     $pdo->beginTransaction();
     try {
