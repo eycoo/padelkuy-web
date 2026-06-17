@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — PadelKuy</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: #F8FAFC;">
+
+  <nav class="navbar">
+    <div class="logo">Padel<span>Kuy</span></div>
+    <div id="nav-actions">
+        <span class="profile-name" id="admin-name">Memuat...</span>
+        <button id="btn-admin-logout" class="btn btn-ghost" style="padding: 8px 16px;">Logout</button>
+    </div>
+  </nav>
+
+  <div class="back-container">
+    <a href="index.html" class="btn-back">&lt; Kembali Ke Beranda</a>
+  </div>
+
+  <main class="admin-dashboard">
+    
+    <section class="admin-panel admin-venue-section">
+      <div class="inline-edit-group" style="margin-bottom: 24px;">
+        <h1 id="venue-name-text" class="editable-text" contenteditable="true" style="font-size: 28px; margin-bottom: 4px; color: var(--text);">NAMA VENUE</h1>
+        <div id="venue-location-text" class="editable-text" contenteditable="true" style="color: var(--muted); font-size: 14px;">Jl. Surabaya</div>
+      </div>
+  
+      <div class="inline-edit-group" style="margin-bottom: 24px;">
+        <label class="section-label">About</label>
+        <div id="venue-about-text" class="editable-text" contenteditable="true" style="font-size: 14px; line-height: 1.6; color: var(--text); min-height: 40px;">Lorem ipsum dolor sit amet...</div>
+      </div>
+  
+      <div class="inline-edit-group" style="margin-bottom: 24px;">
+        <label class="section-label">Image Information</label>
+        <div class="image-grid">
+          <div class="image-slot" onclick="alert('Buka dialog upload Thumbnail')">Thumbnails</div>
+          <div class="image-slot" onclick="alert('Buka dialog upload Main Image')">Main Image</div>
+          <div class="image-slot" onclick="alert('Buka dialog upload Detail Image 1')">Detail Image</div>
+          <div class="image-slot" onclick="alert('Buka dialog upload Detail Image 2')">Detail Image</div>
+        </div>
+      </div>
+  
+      <div class="inline-edit-group" style="margin-bottom: 32px;">
+        <label class="section-label">Facility</label>
+        <div class="facility-wrapper">
+          <div id="facility-chips" class="chip-container">
+            <span class="chip">Shower <button class="btn-remove-chip" onclick="this.parentElement.remove()">x</button></span>
+          </div>
+          <input type="text" id="facility-input" placeholder="(+)" class="ghost-input">
+        </div>
+      </div>
+  
+      <label class="section-label">Daftar Lapangan</label>
+      <div id="courts-wrapper">
+        <!-- JS render -->
+      </div>
+      <button id="btn-add-court" class="btn btn-ghost" style="width: 100%; border-style: dashed;">+ Tambah Lapangan</button>
+      
+      <button class="btn btn-primary" style="width: 100%; margin-top: 32px; padding: 14px;" onclick="alert('Simpan semua perubahan JSON ke Backend')">Simpan Perubahan Venue</button>
+    </section>
+
+    <section class="admin-panel admin-bookings-section">
+      <h2 style="margin-bottom: 24px; color: var(--text);">Manajemen Pesanan Baru</h2>
+      
+      <div class="tabs" style="margin-bottom: 24px;">
+        <button class="tab-btn active" data-filter="all">Semua</button>
+        <button class="tab-btn" data-filter="pending">Menunggu Pembayaran</button>
+        <button class="tab-btn" data-filter="completed">Selesai</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Pemesan</th>
+              <th>Lapangan</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-bookings-table">
+            </tbody>
+        </table>
+      </div>
+      
+      <div class="pagination" style="margin-top: 24px; display: flex; justify-content: center; gap: 8px;">
+        <span class="muted">&lt; Prev</span>
+        <span style="font-weight: bold; color: var(--neon);">1</span>
+        <span class="muted">2</span>
+        <span class="muted">3</span>
+        <span class="muted">Next &gt;</span>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
