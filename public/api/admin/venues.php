@@ -28,7 +28,14 @@ try {
             return;
 
         case 'POST':
-            $newId = createVenue(db(), read_body());
+            $body = read_body();
+            $newId = createVenue(db(), $body);
+            if (is_array($body['facilities'] ?? null)) {
+                setFacilities(db(), $newId, $body['facilities']);
+            }
+            if (is_array($body['images'] ?? null)) {
+                setImages(db(), $newId, $body['images']);
+            }
             send_json(getVenue(db(), $newId), 201);
             return;
 
@@ -37,9 +44,16 @@ try {
                 send_error('id is required', 422);
                 return;
             }
-            if (!updateVenue(db(), $id, read_body())) {
+            $body = read_body();
+            if (!updateVenue(db(), $id, $body)) {
                 send_error('Venue not found', 404);
                 return;
+            }
+            if (is_array($body['facilities'] ?? null)) {
+                setFacilities(db(), $id, $body['facilities']);
+            }
+            if (is_array($body['images'] ?? null)) {
+                setImages(db(), $id, $body['images']);
             }
             send_json(getVenue(db(), $id));
             return;
