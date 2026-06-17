@@ -3,38 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register — PadelKuy</title>
+<title>Daftar Mitra — PadelKuy</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="auth-page">
 
   <div class="auth-hero">
-    <h2>Book your padel court in seconds, not hours.</h2>
-    <p>Find open slots near you, lock in your time, and just show up. No phone calls, no group chats.</p>
+    <h2>Kelola venue padel Anda dengan mudah dan rapi.</h2>
+    <p>Bergabunglah menjadi mitra PadelKuy. Atur jadwal lapangan, pantau pesanan masuk, dan tingkatkan pendapatan venue Anda dalam satu dashboard.</p>
   </div>
 
   <div class="auth-form-side">
     <div class="auth-form-container">
       <div class="auth-header">
-        <div class="auth-logo">Padel<span>Kuy</span></div>
-        <h1>Mulai Main Sekarang!</h1>
+        <div class="auth-logo">Padel<span>Kuy</span> <span class="badge-admin"></span></div>
+        <h1>Daftarkan Venue Anda</h1>
       </div>
 
-      <form class="auth-form" id="register-form">
+      <form class="auth-form" id="register-admin-form">
         <div class="field">
-          <label>Nama Lengkap</label>
-          <input type="text" id="name" required placeholder="Nama kamu">
+          <label>Nama Pengelola</label>
+          <input type="text" id="admin-name" required placeholder="Nama lengkap Anda">
+        </div>
+
+        <div class="field">
+          <label>Nama Venue</label>
+          <input type="text" id="admin-venue" required placeholder="Contoh: The G Club Padel">
         </div>
         
         <div class="field">
-          <label>Email</label>
-          <input type="email" id="email" required placeholder="nama@email.com">
+          <label>Email Bisnis</label>
+          <input type="email" id="admin-email" required placeholder="nama@venue.com">
         </div>
         
         <div class="field">
           <label>Password</label>
           <div class="password-wrapper">
-            <input type="password" id="password" required placeholder="••••••••">
+            <input type="password" id="admin-password" required placeholder="••••••••">
             <button type="button" class="btn-toggle-pass" tabindex="-1">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
@@ -44,20 +49,20 @@
         <div class="field">
           <label>Konfirmasi Password</label>
           <div class="password-wrapper">
-            <input type="password" id="confirm_password" required placeholder="••••••••">
+            <input type="password" id="admin-confirm-password" required placeholder="••••••••">
             <button type="button" class="btn-toggle-pass" tabindex="-1">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
         </div>
         
-        <div id="register-error" style="color: red; font-size: 13px; display: none;"></div>
-        <button type="submit" class="btn btn-primary auth-submit" id="btn-register">Daftar Akun</button>
+        <div id="register-admin-error" style="color: red; font-size: 13px; display: none;"></div>
+        <button type="submit" class="btn btn-primary auth-submit" id="btn-register-admin">Daftar Sebagai Mitra</button>
       </form>
 
       <div class="auth-footer">
-        <p>punya akun? <a href="login.html">Masuk di sini</a></p>
-        <p>Ingin mendaftarkan venue? <a href="registerai-admin.html">Daftarkan di sini</a></p>
+        <p>Sudah menjadi mitra? <a href="login.html">Masuk di sini</a></p>
+        <p>Hanya ingin bermain? <a href="register.html">Daftar sebagai pemain</a></p>
       </div>
     </div>
   </div>
