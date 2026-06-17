@@ -863,6 +863,135 @@ a { color: inherit; text-decoration: none; }
 .auth-footer a { color: var(--neon); font-weight: 600; }
 .auth-footer a:hover { text-decoration: underline; }
 
+/* ─── Halaman Riwayat Pesanan ───────────────────────────── */
+
+.riwayat-wrap {
+    padding: 20px 60px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 24px;
+}
+
+/* Tabs Filter */
+.tabs {
+    display: inline-flex;
+    width: 100%;
+    background: var(--backcolor-soft);
+    padding: 6px;
+    border-radius: 14px; 
+    gap: 20px;
+    margin-bottom: 24px;
+    border: none; 
+}
+
+.tab-btn {
+    background: var(--neon-dim);
+    border: none;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--backcolor-soft);
+    border-radius: 10px; /* Sudut membulat untuk setiap tombol */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    bottom: 0; 
+}
+
+.tab-btn.active {
+    background: var(--neon); 
+    color: var(--backcolor-soft); 
+    box-shadow: 0 2px 8px rgba(24, 57, 136, 0.08); 
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--backcolor-soft); 
+}
+
+/* Daftar Kartu */
+.bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.booking-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.booking-code {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* Badge Status (Merah, Hijau, Kuning) */
+.badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-success { background: var(--neon-dim); color: var(--backcolor-soft); } /* Hijau untuk Selesai */
+.badge-danger  { background: #b60900; color: var(--backcolor-soft); } /* Merah untuk Batal/Expired */
+.badge-pending { background: #da803f; color: var(--backcolor-soft); } /* Kuning untuk Menunggu */
+
+/* Detail Teks Pesanan */
+.booking-details {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.booking-details strong {
+    color: var(--text);
+}
+
+.booking-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+}
+
+.btn-pay {
+    background: var(--neon);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-pay:hover { background: var(--neon-dim); }
+
+@media (max-width: 900px) {
+    .riwayat-wrap { padding: 20px 24px; }
+    .tabs { overflow-x: auto; white-space: nowrap; }
+}
+
+/* ─── Responsive ────────────────────────────────────────── */
+
 @media (max-width: 900px) {
   .auth-page { flex-direction: column; }
   .auth-form-side { width: 100%; max-width: none; padding: 24px; }
@@ -873,9 +1002,6 @@ a { color: inherit; text-decoration: none; }
   .auth-split-container { flex-direction: column; max-width: 420px; }
   .auth-hero { padding: 30px; min-height: 200px; }
 }
-
-
-/* ─── Responsive ────────────────────────────────────────── */
 
 @media (max-width: 900px) {
   .navbar, .footer { padding-left: 24px; padding-right: 24px; }
