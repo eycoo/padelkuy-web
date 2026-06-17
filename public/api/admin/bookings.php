@@ -1,7 +1,8 @@
 <?php
 // Admin booking oversight. All methods require an admin session.
-//   GET    /api/admin/bookings.php[?venue_id=N][&date=YYYY-MM-DD]  -> all bookings
+//   GET    /api/admin/bookings.php[?venue_id=N][&date=][&status=][&page=N][&limit=N]
 //   DELETE /api/admin/bookings.php?id=N                            -> cancel one
+// GET sends the total match count (ignoring paging) in the X-Total-Count header.
 require_once __DIR__ . '/../../../config/db.php';
 require_once __DIR__ . '/../../../lib/http.php';
 require_once __DIR__ . '/../../../lib/auth.php';
@@ -22,6 +23,16 @@ try {
             if (!empty($_GET['date'])) {
                 $filters['date'] = (string) $_GET['date'];
             }
+            if (!empty($_GET['status'])) {
+                $filters['status'] = (string) $_GET['status'];
+            }
+            if (!empty($_GET['limit']) || !empty($_GET['page'])) {
+                $limit = max(1, min(100, (int) ($_GET['limit'] ?? 20)));
+                $page  = max(1, (int) ($_GET['page'] ?? 1));
+                $filters['limit']  = $limit;
+                $filters['offset'] = ($page - 1) * $limit;
+            }
+            header('X-Total-Count: ' . countAllBookings(db(), $filters));
             send_json(listAllBookings(db(), $filters));
             return;
 

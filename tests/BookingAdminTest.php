@@ -113,4 +113,51 @@ final class BookingAdminTest extends TestCase
         $this->assertSame('paid', $all[0]['status']);
         $this->assertSame('paid', $all[0]['payment_status']);
     }
+
+    // --- #49 status filter + pagination ---
+
+    public function test_filters_by_status(): void
+    {
+        $paid = createBooking($this->pdo, 1, 1, $this->date, 8, 9);
+        payForBooking($this->pdo, 1, $paid);
+        createBooking($this->pdo, 2, 2, $this->date, 10, 11); // stays pending
+
+        $onlyPaid = listAllBookings($this->pdo, ['status' => 'paid']);
+        $this->assertCount(1, $onlyPaid);
+        $this->assertSame('paid', $onlyPaid[0]['status']);
+
+        $onlyPending = listAllBookings($this->pdo, ['status' => 'pending']);
+        $this->assertCount(1, $onlyPending);
+        $this->assertSame('pending', $onlyPending[0]['status']);
+    }
+
+    public function test_limit_and_offset_window(): void
+    {
+        for ($h = 8; $h < 13; $h++) {
+            createBooking($this->pdo, 1, 1, $this->date, $h, $h + 1); // 5 bookings
+        }
+
+        $page1 = listAllBookings($this->pdo, ['limit' => 2, 'offset' => 0]);
+        $page2 = listAllBookings($this->pdo, ['limit' => 2, 'offset' => 2]);
+        $page3 = listAllBookings($this->pdo, ['limit' => 2, 'offset' => 4]);
+
+        $this->assertCount(2, $page1);
+        $this->assertCount(2, $page2);
+        $this->assertCount(1, $page3);
+        // windows must not overlap
+        $ids = array_merge(array_column($page1, 'id'), array_column($page2, 'id'), array_column($page3, 'id'));
+        $this->assertCount(5, array_unique($ids));
+    }
+
+    public function test_count_total_ignores_paging_but_honours_filters(): void
+    {
+        for ($h = 8; $h < 13; $h++) {
+            createBooking($this->pdo, 1, 1, $this->date, $h, $h + 1);
+        }
+        createBooking($this->pdo, 2, 2, $this->date, 8, 9); // venue 2
+
+        $this->assertSame(6, countAllBookings($this->pdo));
+        $this->assertSame(1, countAllBookings($this->pdo, ['venue_id' => 2]));
+        $this->assertSame(5, countAllBookings($this->pdo, ['venue_id' => 1, 'limit' => 2]));
+    }
 }
