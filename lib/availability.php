@@ -1,6 +1,8 @@
 <?php
 // Availability is derived from bookings — there is no slots table (ADR-0001).
-// Operating hours are fixed: bookable start hours run 07:00..20:00.
+// Operating hours default to a fixed 07:00..20:00 grid, but a court may override
+// both its bookable hours and pricing via court_schedules (#48).
+require_once __DIR__ . '/schedules.php';
 
 const OPEN_HOUR  = 7;   // first bookable start hour
 const CLOSE_HOUR = 20;  // last bookable start hour (the 20:00 slot covers 20-21)
@@ -20,10 +22,77 @@ function expireStalePendingBookings(PDO $pdo): void
     );
 }
 
-// All bookable start hours of a day.
+// All bookable start hours of a day (the fixed-grid fallback).
 function operating_hours(): array
 {
     return range(OPEN_HOUR, CLOSE_HOUR);
+}
+
+// True if a day band applies to a date. everyday always applies; mon_fri on
+// Mon-Fri; sat_sun on Sat/Sun.
+function bandMatchesDate(string $band, string $date): bool
+{
+    $w = (int) date('N', strtotime($date)); // 1=Mon .. 7=Sun
+    return match ($band) {
+        'mon_fri' => $w >= 1 && $w <= 5,
+        'sat_sun' => $w >= 6,
+        default   => true, // everyday
+    };
+}
+
+// The bookable start hours for a court on a date. Driven by court_schedules
+// when the court has any (union of the hours whose band matches the date);
+// otherwise the fixed operating_hours() grid.
+function bookableHoursForDate(PDO $pdo, int $court_id, string $date): array
+{
+    $schedules = listSchedules($pdo, $court_id);
+    if ($schedules === []) {
+        return operating_hours();
+    }
+
+    $hours = [];
+    foreach ($schedules as $s) {
+        if (!bandMatchesDate($s['day_band'], $date)) {
+            continue;
+        }
+        for ($h = $s['start_hour']; $h < $s['end_hour']; $h++) {
+            $hours[$h] = true;
+        }
+    }
+    $hours = array_keys($hours);
+    sort($hours);
+    return $hours;
+}
+
+// The price of one hour on a court for a date: the matching schedule's price
+// (a specific band beats everyday), falling back to the venue's flat
+// price_per_hour when no schedule covers it.
+function priceForHour(PDO $pdo, int $court_id, string $date, int $hour): int
+{
+    $best = null;
+    $bestSpecificity = -1;
+    foreach (listSchedules($pdo, $court_id) as $s) {
+        if (!bandMatchesDate($s['day_band'], $date)) {
+            continue;
+        }
+        if ($hour < $s['start_hour'] || $hour >= $s['end_hour']) {
+            continue;
+        }
+        $specificity = $s['day_band'] === 'everyday' ? 0 : 1;
+        if ($specificity > $bestSpecificity) {
+            $best = (int) $s['price'];
+            $bestSpecificity = $specificity;
+        }
+    }
+    if ($best !== null) {
+        return $best;
+    }
+
+    $stmt = $pdo->prepare(
+        'SELECT v.price_per_hour FROM courts c JOIN venues v ON v.id = c.venue_id WHERE c.id = ?'
+    );
+    $stmt->execute([$court_id]);
+    return (int) $stmt->fetchColumn();
 }
 
 // The hour grid for one court on one date: each hour flagged taken if any
@@ -41,7 +110,7 @@ function getAvailability(PDO $pdo, int $court_id, string $date): array
     $bookings = $stmt->fetchAll();
 
     $grid = [];
-    foreach (operating_hours() as $hour) {
+    foreach (bookableHoursForDate($pdo, $court_id, $date) as $hour) {
         $taken = false;
         foreach ($bookings as $b) {
             if ((int) $b['start_hour'] <= $hour && $hour < (int) $b['end_hour']) {
@@ -49,7 +118,11 @@ function getAvailability(PDO $pdo, int $court_id, string $date): array
                 break;
             }
         }
-        $grid[] = ['hour' => $hour, 'taken' => $taken];
+        $grid[] = [
+            'hour'  => $hour,
+            'taken' => $taken,
+            'price' => priceForHour($pdo, $court_id, $date, $hour),
+        ];
     }
     return $grid;
 }
