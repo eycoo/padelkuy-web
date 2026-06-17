@@ -25,7 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json();
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('userName', data.name);
-                    window.location.href = 'index.html';
+                    
+                    /* Simpan role (user/admin) dari backend */
+                    localStorage.setItem('userRole', data.role);
+                    
+                    /* Cek role untuk menentukan arah halaman */
+                    if (data.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 } else if (response.status === 401) {
                     errorDiv.innerText = 'Email atau password salah.';
                     errorDiv.style.display = 'block';
@@ -101,6 +110,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.disabled = false;
                 btn.innerText = 'Daftar Akun';
             }
+        });
+    }
+
+    const registerAdminForm = document.getElementById('register-admin-form');
+    if (registerAdminForm) {
+        registerAdminForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('admin-name').value;
+            const venue = document.getElementById('admin-venue').value;
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            const confirmPass = document.getElementById('admin-confirm-password').value;
+            const errorDiv = document.getElementById('register-admin-error');
+            const btn = document.getElementById('btn-register-admin');
+
+            if (password !== confirmPass) {
+                errorDiv.innerText = 'Password tidak cocok.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Memproses...';
+            errorDiv.style.display = 'none';
+
+            // Simulasi pendaftaran dan login otomatis sebagai Admin
+            setTimeout(() => {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('userName', name);
+                
+                // Menyimpan nama venue untuk digunakan di halaman admin
+                localStorage.setItem('adminVenueName', venue); 
+
+                window.location.href = 'admin.html';
+            }, 1000);
         });
     }
 });
