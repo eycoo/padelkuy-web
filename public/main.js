@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cek status login statis untuk testing
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'; 
+    const userName = localStorage.getItem('userName') || 'Demo_user';
 
     if (navActions) {
         // SVG Ikon Tiket 
@@ -115,13 +116,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isLoggedIn) {
             // Render jika sudah login (Nama Profil & Tiket dengan Notif)
-            navActions.innerHTML = `
-                <span class="profile-name">Nama_Profile</span>
+           navActions.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="profile-name">${userName}</span>
+                    <button id="btn-logout" class="btn btn-ghost" style="padding: 8px 16px;">Logout</button>
+                </div>
                 <a href="riwayat.html" class="ticket-icon-wrapper" title="Riwayat Pesanan">
                     ${ticketIconSVG}
                     <span class="notif-badge"></span>
                 </a>
             `;
+            // Logika fungsi klik untuk Logout
+            document.getElementById('btn-logout').addEventListener('click', async () => {
+                try {
+                    await fetch('/api/logout.php', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                } catch (err) {
+                    console.error("Gagal logout:", err);
+                }
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userName');
+                window.location.reload();
+            });
         } else {
             // Render jika belum login (Login & Register menjadi Button terpisah)
             navActions.innerHTML = `

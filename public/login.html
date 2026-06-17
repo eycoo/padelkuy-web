@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — PadelKuy</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-hero">
+    <h2>Book your padel court in seconds, not hours.</h2>
+    <p>Find open slots near you, lock in your time, and just show up. No phone calls, no group chats.</p>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-container">
+      <div class="auth-header">
+        <div class="auth-logo">Padel<span>Kuy</span></div>
+        <h1>Selamat Datang Kembali</h1>
+      </div>
+
+      <form class="auth-form" id="login-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" required placeholder="nama@email.com" autocomplete="off">
+        </div>
+        
+        <div class="field">
+          <label>Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="btn-toggle-pass" tabindex="-1">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+        
+        <div id="login-error" style="color: red; font-size: 13px; display: none;"></div>
+        <button type="submit" class="btn btn-primary auth-submit" id="btn-login">Masuk</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Belum punya akun? <a href="register.html">Daftar di sini</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
