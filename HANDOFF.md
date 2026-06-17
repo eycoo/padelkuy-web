@@ -12,6 +12,11 @@ PadelKuy is being turned from a static demo into a working full-stack booking ap
 #28–#32): bookings now have a status (`pending`/`paid`/`expired`/`cancelled`) and a
 human-readable code, payment is simulated, and refunds are timed. Its frontend is
 #33–#35.
+**PDF payment receipt (kuitansi) is done and merged** (ADR-0004, issues #41–#42):
+a customer downloads a generated-on-demand PDF receipt for a paid booking from
+their order history (`GET /api/receipt.php`); also satisfies the "reporting PDF"
+deliverable. **The customer frontend (Royan's `frontend` branch) has been merged
+to `master`** — homepage, detail, login/register, and order history now call the API.
 
 - **Stack:** native PHP + MySQL, no fullstack framework, no Node/TypeScript (course constraint). Backend is a JSON API; frontend is plain HTML/CSS/JS calling it with `fetch()`. See `docs/adr/0002-...`.
 - **Default branch is `master`** (the real history). `main` is an unrelated 2-commit stub — ignore it.
@@ -24,10 +29,10 @@ public/            web root (serve this dir)
   api/             JSON endpoints (done); api/admin/ = admin-only endpoints
 lib/               domain logic — http, session, auth, venues, courts, availability, bookings
 config/db.php      PDO connection (env-overridable)
-tests/             PHPUnit (64 tests, all green)
-schema.sql seed.sql
+tests/             PHPUnit (69 tests, all green)
+schema.sql seed.sql              (+ schema.railway.sql / seed.railway.sql for managed hosts)
 CONTEXT.md         domain glossary (Customer / Admin / Venue / Court / Slot / Booking / Booking code / Payment / Refund)
-docs/adr/          0001 derive-availability, 0002 json-api, 0003 booking-payment-lifecycle
+docs/adr/          0001 derive-availability, 0002 json-api, 0003 booking-payment-lifecycle, 0004 pdf-payment-receipt
 docs/erd.png       rendered ERD (source docs/erd.mmd); regenerate after schema changes
 ```
 
@@ -63,6 +68,7 @@ DB connection defaults: host `127.0.0.1`, db `padelkuy`, user `root`, no passwor
 | `GET /api/bookings.php` | — (session) | `[{...booking, code, status, hours, price}]` | `401` |
 | `POST /api/payments.php` | `{booking_id}` | `201 {id,booking_id,amount,status,paid_at,refunded_at}` (settles a pending booking) | `401` · `403` not owner · `404` · `422` not payable/expired |
 | `POST /api/cancel.php` | `{booking_id}` | `200 {…payment, status:"refunded"}` (self-cancel paid booking inside the 5-min window) | `401` · `403` not owner / window closed · `404` · `422` not a paid booking |
+| `GET /api/receipt.php?booking_id=N` | — (session) | `200` PDF stream (kuitansi for a paid booking; generated on demand, ADR-0004) | `401` · `403` not owner · `404` · `422` no payment yet |
 
 Frontend must send `Content-Type: application/json` and include credentials so the PHP session cookie is stored/sent.
 
@@ -122,6 +128,27 @@ Parent PRD #19. The admin BE (#20–#23) is merged to `master`.
 | #35 | Admin booking-management page: status + payment status + cancel (extends #26) | #32 (BE, done) |
 
 All BE blockers are merged; these can start whenever Royan picks them up.
+
+## Deploy & CI
+
+- **CI:** `.github/workflows/ci.yml` runs the full PHPUnit suite against a MySQL 8
+  service on every push to `master` and every PR. `tests/bootstrap.php` builds the
+  throwaway `padelkuy_test` DB from `schema.sql`, so nothing extra is needed — keep
+  it green before merging.
+- **Deploy (Railway, Docker):** `Dockerfile` is `php:8.2-apache` with the docroot
+  set to `public/` (so `lib/`+`config/` are never web-served) and Apache listening
+  on `$PORT`. `railway.json` builds from it. Connect the repo + add a MySQL plugin,
+  then map its vars to the env the app reads: `DB_HOST/DB_NAME/DB_USER/DB_PASS`
+  (see `config/db.php` — all env-overridable).
+- **Schema on a managed host:** import `schema.railway.sql` then `seed.railway.sql`
+  (the plain `schema.sql`/`seed.sql` carry `CREATE DATABASE`/`USE padelkuy`, which
+  managed providers reject — the `.railway.sql` variants drop those lines).
+- **Auto-update from GitHub:** Railway redeploys on every push to `master` — but
+  only the **code**. The database is NOT migrated automatically. A code-only
+  feature goes live on push; a feature that changes the schema (new column/table)
+  needs its SQL applied to the Railway MySQL by hand, or the deployed code will hit
+  a stale DB (the "Unknown column 'status'" class of error). Keep schema changes
+  in `schema.sql` AND mirror them into `schema.railway.sql`.
 
 ## Open / loose ends
 
