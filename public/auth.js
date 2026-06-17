@@ -103,4 +103,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const registerAdminForm = document.getElementById('register-admin-form');
+    if (registerAdminForm) {
+        registerAdminForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('admin-name').value;
+            const venue = document.getElementById('admin-venue').value;
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            const confirmPass = document.getElementById('admin-confirm-password').value;
+            const errorDiv = document.getElementById('register-admin-error');
+            const btn = document.getElementById('btn-register-admin');
+
+            if (password !== confirmPass) {
+                errorDiv.innerText = 'Password tidak cocok.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Memproses...';
+            errorDiv.style.display = 'none';
+
+            // Simulasi pendaftaran dan login otomatis sebagai Admin
+            setTimeout(() => {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('userName', name);
+                
+                // Menyimpan nama venue untuk digunakan di halaman admin
+                localStorage.setItem('adminVenueName', venue); 
+
+                window.location.href = 'admin.html';
+            }, 1000);
+        });
+    }
 });

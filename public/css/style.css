@@ -985,12 +985,121 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-pay:hover { background: var(--neon-dim); }
 
+/* ─── Halaman Pembayaran (Split Layout) ─────────────────── */
+
+.payment-wrap {
+    padding: 20px 60px 80px;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.payment-split-container {
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+    gap: 32px;
+}
+
+/* Sisi Kiri (Detail) */
+.payment-left {
+    flex: 1;
+    background: var(--backcolor-soft);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(24, 57, 136, 0.04);
+}
+
+.payment-header { margin-bottom: 32px; }
+.payment-header h1 { font-size: 26px; color: var(--text); margin-bottom: 8px; }
+
+.countdown-text {
+    font-weight: 600;
+    font-size: 15px;
+    background: #b60900; color: var(--backcolor-soft); 
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.payment-details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #F1F5F9;
+    padding-bottom: 12px;
+    font-size: 15px;
+}
+.detail-row strong { color: var(--text); }
+
+.payment-total {
+    margin-top: auto;
+    background: var(--neon);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.total-price-text { font-size: 24px; font-weight: 700; color: #fff; }
+
+/* Sisi Kanan (QRIS) */
+.payment-right {
+    flex: 1;
+    padding: 40px;
+    background: var(--backcolor-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(24, 57, 136, 0.04);
+}
+
+.qris-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+.qris-img-wrapper {
+    width: 240px;
+    height: 240px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.qris-img-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+.btn-full { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; }
+
+@media (max-width: 900px) {
+    .payment-wrap { padding: 20px 24px 60px; }
+    .payment-split-container { flex-direction: column; }
+    .payment-left { border-right: none; border-bottom: 1px dashed var(--line); padding: 24px; }
+    .payment-right { padding: 32px 24px; }
+    .qris-img-wrapper { width: 200px; height: 200px; }
+}
+
 @media (max-width: 900px) {
     .riwayat-wrap { padding: 20px 24px; }
     .tabs { overflow-x: auto; white-space: nowrap; }
 }
-
-/* ─── Responsive ────────────────────────────────────────── */
 
 @media (max-width: 900px) {
   .auth-page { flex-direction: column; }
