@@ -25,7 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json();
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('userName', data.name);
-                    window.location.href = 'index.html';
+                    
+                    /* Simpan role (user/admin) dari backend */
+                    localStorage.setItem('userRole', data.role);
+                    
+                    /* Cek role untuk menentukan arah halaman */
+                    if (data.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 } else if (response.status === 401) {
                     errorDiv.innerText = 'Email atau password salah.';
                     errorDiv.style.display = 'block';
