@@ -24,6 +24,15 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
         throw new InvalidArgumentException('booking is outside operating hours');
     }
 
+    // Every hour must be bookable for this court/date (schedule-aware; falls
+    // back to the fixed grid when the court has no schedules — #48).
+    $bookable = bookableHoursForDate($pdo, $court_id, $date);
+    for ($h = $start; $h < $end; $h++) {
+        if (!in_array($h, $bookable, true)) {
+            throw new InvalidArgumentException('booking includes an hour the court is not open');
+        }
+    }
+
     // Free any expired holds so a stale pending booking can't block a new one.
     expireStalePendingBookings($pdo);
 
@@ -70,7 +79,7 @@ function createBooking(PDO $pdo, int $user_id, int $court_id, string $date, int 
 function getBooking(PDO $pdo, int $id): ?array
 {
     $stmt = $pdo->prepare(
-        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
+        'SELECT b.id, b.court_id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour
          FROM bookings b
          JOIN courts c ON c.id = b.court_id
@@ -82,7 +91,7 @@ function getBooking(PDO $pdo, int $id): ?array
     if (!$row) {
         return null;
     }
-    return formatBooking($row);
+    return applySchedulePrice($pdo, formatBooking($row));
 }
 
 // All bookings owned by a user, newest date first, with labels and price.
@@ -91,7 +100,7 @@ function listUserBookings(PDO $pdo, int $user_id): array
     expireStalePendingBookings($pdo);
 
     $stmt = $pdo->prepare(
-        'SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
+        'SELECT b.id, b.court_id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour
          FROM bookings b
          JOIN courts c ON c.id = b.court_id
@@ -100,15 +109,13 @@ function listUserBookings(PDO $pdo, int $user_id): array
          ORDER BY b.date DESC, b.start_hour ASC'
     );
     $stmt->execute([$user_id]);
-    return array_map('formatBooking', $stmt->fetchAll());
+    return array_map(fn ($row) => applySchedulePrice($pdo, formatBooking($row)), $stmt->fetchAll());
 }
 
-// Admin view: every booking across all users, newest date first, with the
-// booker's name. Optional filters: 'venue_id' (int) and 'date' (YYYY-MM-DD).
-function listAllBookings(PDO $pdo, array $filters = []): array
+// Build the shared WHERE clause + args for the admin booking views from
+// 'venue_id' (int), 'date' (YYYY-MM-DD) and 'status' filters.
+function bookingFilterClause(array $filters): array
 {
-    expireStalePendingBookings($pdo);
-
     $where = [];
     $args  = [];
 
@@ -120,10 +127,50 @@ function listAllBookings(PDO $pdo, array $filters = []): array
         $where[] = 'b.date = ?';
         $args[]  = (string) $filters['date'];
     }
-    $clause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+    if (!empty($filters['status'])) {
+        $where[] = 'b.status = ?';
+        $args[]  = (string) $filters['status'];
+    }
+
+    return [$where ? 'WHERE ' . implode(' AND ', $where) : '', $args];
+}
+
+// Total bookings matching the filters, ignoring limit/offset — for the pager.
+function countAllBookings(PDO $pdo, array $filters = []): int
+{
+    expireStalePendingBookings($pdo);
+    [$clause, $args] = bookingFilterClause($filters);
 
     $stmt = $pdo->prepare(
-        "SELECT b.id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
+        "SELECT COUNT(*)
+         FROM bookings b
+         JOIN courts c ON c.id = b.court_id
+         JOIN venues v ON v.id = c.venue_id
+         $clause"
+    );
+    $stmt->execute($args);
+    return (int) $stmt->fetchColumn();
+}
+
+// Admin view: every booking across all users, newest date first, with the
+// booker's name. Optional filters: 'venue_id' (int), 'date' (YYYY-MM-DD),
+// 'status'. Optional paging: 'limit' (1..100) + 'offset'.
+function listAllBookings(PDO $pdo, array $filters = []): array
+{
+    expireStalePendingBookings($pdo);
+
+    [$clause, $args] = bookingFilterClause($filters);
+
+    // Sanitised ints, inlined (LIMIT/OFFSET placeholders are awkward under PDO).
+    $paging = '';
+    if (isset($filters['limit'])) {
+        $limit  = max(1, min(100, (int) $filters['limit']));
+        $offset = max(0, (int) ($filters['offset'] ?? 0));
+        $paging = " LIMIT $limit OFFSET $offset";
+    }
+
+    $stmt = $pdo->prepare(
+        "SELECT b.id, b.court_id, b.user_id, b.date, b.start_hour, b.end_hour, b.status, b.code,
                 c.label AS court_label, v.name AS venue_name, v.price_per_hour,
                 u.name AS user_name, p.status AS payment_status
          FROM bookings b
@@ -132,12 +179,12 @@ function listAllBookings(PDO $pdo, array $filters = []): array
          JOIN users  u ON u.id = b.user_id
          LEFT JOIN payments p ON p.booking_id = b.id
          $clause
-         ORDER BY b.date DESC, b.start_hour ASC"
+         ORDER BY b.date DESC, b.start_hour ASC$paging"
     );
     $stmt->execute($args);
 
-    return array_map(function (array $row) {
-        $out = formatBooking($row);
+    return array_map(function (array $row) use ($pdo) {
+        $out = applySchedulePrice($pdo, formatBooking($row));
         $out['user_name'] = $row['user_name'];
         $out['payment_status'] = $row['payment_status'];
         return $out;
@@ -157,12 +204,14 @@ function cancelBooking(PDO $pdo, int $id): bool
     return $stmt->rowCount() > 0;
 }
 
-// Shape a raw booking row into the API representation with a computed price.
+// Shape a raw booking row into the API representation with a flat computed
+// price (venue rate). applySchedulePrice refines this when schedules apply.
 function formatBooking(array $row): array
 {
     $hours = (int) $row['end_hour'] - (int) $row['start_hour'];
     return [
         'id'         => (int) $row['id'],
+        'court_id'   => isset($row['court_id']) ? (int) $row['court_id'] : null,
         'code'       => $row['code'] ?? null,
         'status'     => $row['status'] ?? null,
         'venue_name' => $row['venue_name'],
@@ -173,4 +222,20 @@ function formatBooking(array $row): array
         'hours'      => $hours,
         'price'      => $hours * (int) $row['price_per_hour'],
     ];
+}
+
+// Recompute a booking's price as the sum of its per-hour rates (#48). For a
+// court with no schedules priceForHour returns the flat venue rate, so this
+// leaves fallback bookings unchanged.
+function applySchedulePrice(PDO $pdo, array $b): array
+{
+    if (empty($b['court_id'])) {
+        return $b;
+    }
+    $sum = 0;
+    for ($h = (int) $b['start_hour']; $h < (int) $b['end_hour']; $h++) {
+        $sum += priceForHour($pdo, (int) $b['court_id'], (string) $b['date'], $h);
+    }
+    $b['price'] = $sum;
+    return $b;
 }
