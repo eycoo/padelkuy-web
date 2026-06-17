@@ -65,4 +65,41 @@ final class CourtAdminTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         createCourt($this->pdo, $this->venueId, '   ');
     }
+
+    // --- #46 court type + rich name ---
+
+    public function test_create_with_type_and_rich_name(): void
+    {
+        createCourt($this->pdo, $this->venueId, 'Lapangan 1', 'outdoor');
+        $court = listCourts($this->pdo, $this->venueId)[0];
+        $this->assertSame('Lapangan 1', $court['label']);
+        $this->assertSame('outdoor', $court['type']);
+    }
+
+    public function test_type_defaults_to_indoor(): void
+    {
+        createCourt($this->pdo, $this->venueId, 'A');
+        $this->assertSame('indoor', listCourts($this->pdo, $this->venueId)[0]['type']);
+    }
+
+    public function test_rejects_bad_type(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        createCourt($this->pdo, $this->venueId, 'A', 'rooftop');
+    }
+
+    public function test_update_changes_label_and_type(): void
+    {
+        $id = createCourt($this->pdo, $this->venueId, 'A', 'indoor');
+        $this->assertTrue(updateCourt($this->pdo, $id, 'Lapangan 2', 'outdoor'));
+
+        $court = listCourts($this->pdo, $this->venueId)[0];
+        $this->assertSame('Lapangan 2', $court['label']);
+        $this->assertSame('outdoor', $court['type']);
+    }
+
+    public function test_update_returns_false_for_missing(): void
+    {
+        $this->assertFalse(updateCourt($this->pdo, 999999, 'X', 'indoor'));
+    }
 }
