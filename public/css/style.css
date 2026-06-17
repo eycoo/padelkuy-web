@@ -1,11 +1,11 @@
 :root {
-  --neon: #41A67E;
-  --neon-dim: #338665;
+  --neon: #2FA084;
+  --neon-dim: #6FCF97;
   --backcolor: #F0F9FF;
-  --backcolor-soft: #fcfaff;
+  --backcolor-soft: #ffffff;
   --text: #183988;
   --muted: #64748B;
-  --line: #E0F2FE;
+  --line: #B8E9CD;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,6 +31,92 @@ a { color: inherit; text-decoration: none; }
 .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
 .logo span { color: var(--neon); }
 
+/* Layout Navbar Actions */
+#nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Layout Navbar Actions */
+#nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px; /* Jarak antar tombol */
+}
+
+/* --- Styling Button Login & Register --- */
+.nav-btn {
+    padding: 10px 24px;
+    border-radius: 12px; 
+    font-weight: 600;
+    font-size: 15px;
+    transition: 0.2s ease;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* Tombol Login (Gaya Outline / Garis) */
+.btn-login {
+    background: var(--neon-dim);
+    color: var(--backcolor-soft);
+    border: 2px solid var(--neon-dim);
+}
+
+.btn-login:hover {
+    background: var(--neon-dim);
+    border: 2px solid var(--neon);
+}
+
+/* Tombol Register (Gaya Solid / Persis Tombol Search) */
+.btn-register {
+    background: var(--neon);
+    color: #fff;
+    border: 2px solid var(--neon);
+}
+
+.btn-register:hover {
+    background: var(--neon-dim);
+    border-color: var(--neon-dim);
+}
+
+/* --- Teks Profil (Saat Logged In) --- */
+.profile-name {
+    font-weight: 600;
+    color: var(--backcolor-soft);
+    background: var(--neon);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-right: 8px; /* Memberi jarak ke ikon tiket */
+}
+
+/* Wrapper Ikon Tiket */
+.ticket-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--text);
+    transition: 0.2s ease;
+    padding: 8px; /* Area klik diperbesar sedikit */
+}
+
+.ticket-icon-wrapper:hover {
+    color: var(--neon);
+}
+
+/* Titik Merah Notifikasi */
+.notif-badge {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff3b30; 
+    border-radius: 50%;
+    border: 2px solid var(--backcolor-soft); 
+}
+
 .btn {
   display: inline-block;
   padding: 10px 22px;
@@ -55,7 +141,6 @@ a { color: inherit; text-decoration: none; }
 .btn-ghost:hover { border-color: var(--neon); color: var(--neon); }
 
 .footer {
-  border-top: 1px solid var(--line);
   padding: 26px 60px;
   display: flex;
   justify-content: space-between;
@@ -66,20 +151,19 @@ a { color: inherit; text-decoration: none; }
 /* ─── Homepage ─────────────────────────────────────────── */
 
 .hero {
-  padding: 90px 60px 70px;
-  max-width: 1200px;
+  padding: 80px 40px 40px;
+  max-width: 60%;
   margin: 0 auto;
   text-align: center
 }
 
 .hero h1 {
-  font-size: 56px;
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -1.5px;
-  max-width: 780px;
-  margin-bottom: 18px;
-  margin: 0 auto 18px auto;
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 550px;
+  margin-bottom: 16px;
+  margin: 0 auto 16px auto;
 }
 .hero h1 em {
   color: var(--neon);
@@ -88,97 +172,226 @@ a { color: inherit; text-decoration: none; }
 }
 .hero p {
   color: var(--muted);
-  font-size: 18px;
+  font-size: 20px;
   margin-bottom: 36px;
-  max-width: 560px;
-  margin: 0 auto 36px auto;
+  max-width: 550px;
+  margin: 0 auto 30px auto;
 }
 
+/* search   */
 .search-bar {
   display: flex;
-  gap: 12px;
-  background: var(--backcolor-soft);
-  padding: 12px;
-  border-radius: 14px;
-  max-width: 720px;
   align-items: center;
-  border: 1px solid #353941;
+  background: var(--backcolor-soft);
+  border-radius: 24px;
+  padding: 12px 12px 12px 24px;
+  max-width: 864px;
+  height: 90px;
   margin: 0 auto;
-  text-align: left;
-}
-
-.search-field {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 6px 14px;
-}
-.search-field + .search-field {
-  border-left: 1px solid #3a3f47;
-}
-.search-field label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-.search-field input,
-.search-field select {
-  background: transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: none;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  font-family: inherit;
-  width: 100%;
-}
-.search-field input::placeholder { color: #5a5f68; }
-.search-field select {
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b9099' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 4px center;
-  padding-right: 20px;
-}
-.search-field select option {
-  background: var(--backcolor-soft);
-  color: var(--text);
 }
 
-#date-picker-wrapper {
-  position: relative;
+/* --- Grup Input & Icon --- */
+.input-group {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    position: relative;
 }
-.custom-select-display {
-  color: #5a5f68;
-  font-size: 15px;
-  cursor: pointer;
-  padding: 2px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+.input-icon {
+    color: var(--text);
+    margin-right: 12px;
+    flex-shrink: 0;
 }
-.custom-select-display.has-value {
-  color: var(--text);
+
+.location-group {
+    flex: 0.45;
+    border-right: 3px solid var(--text); 
+    padding-right: 20px;
 }
+
+.date-group {
+    flex: 0.55;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.search-bar select {
+    border: none;
+    outline: none;
+    padding: 14px 0;
+    font-size: 16px;
+    flex: 1;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.date-placeholder {
+    font-size: 16px;
+    color: var(--muted); /* Warna agak redup saat belum dipilih */
+    flex: 1;
+    user-select: none;
+}
+
+.date-placeholder.has-value {
+    color: var(--text); /* Berubah gelap saat tanggal sudah dipilih */
+    font-weight: 500;
+}
+
+/* Tombol Search menyesuaikan warna brand */
+#search-btn {
+    background: var(--neon);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#search-btn:hover {
+    background: var(--neon-dim);
+
+}
+
+/* calendar */
 .calendar-popup {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 320px;
-  background: var(--backcolor-soft);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 20px;
-  z-index: 1000;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  margin-top: 15px;
+    position: absolute;
+    top: calc(100% + 15px); /* Jarak dari search bar */
+    left: 0;
+    width: 320px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--line);
+    z-index: 100;
+    
+    /* Disembunyikan secara default */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
 }
+
+/* Muncul saat class active ditambahkan oleh JavaScript */
 .calendar-popup.active {
-  display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Header Kalender (Bulan & Tombol Navigasi) */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.calendar-header button {
+    background: var(--backcolor-soft);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text);
+    transition: 0.2s;
+}
+
+.calendar-header button:hover {
+    background: var(--line);
+}
+
+/* Grid Kalender (7 Kolom untuk Hari) */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+}
+
+/* Label Hari (Su, Mo, Tu, dll) */
+.day-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* Kotak Tanggal */
+.date-cell {
+    padding: 8px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    background: var(--neon-dim); 
+    color: #fff; 
+    font-weight: 500;
+}
+
+.date-cell:hover:not(.empty):not(.past) {
+    background: var(--neon); 
+    transform: scale(1.05); 
+}
+/* Tanggal yang kosong atau sudah lewat */
+.date-cell.empty,
+.date-cell.past {
+    background: var(--line);
+    color: #fff;
+    pointer-events: none;
+}
+.date-cell.empty:empty {
+    background: transparent;
+}
+
+/* Styling Header Section (Garis bawah panjang) */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 80%;
+    max-width: 1152px;
+    margin: 30px auto 20px auto;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--text);
+}
+
+.section-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.section-header a {
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Jarak untuk Grid Venue agar sejajar dengan header */
+.venue-grid {
+    width: 80%;
+    max-width: 1152px;
+    margin: 0 auto; /* Tengah */
+    padding: 0 0 60px 0;
+    
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
 }
 
 .courts {
@@ -249,514 +462,546 @@ a { color: inherit; text-decoration: none; }
 .price { font-size: 16px; font-weight: 700; }
 .price small { color: var(--muted); font-weight: 400; font-size: 12px; }
 
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  font-size: 16px;
+  background: white;
+  border-radius: 12px;
+}
+
 /* ─── Detail Page ───────────────────────────────────────── */
 
-.back-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 60px 0; 
+/* Layout Halaman Detail */
+.back-container { padding: 20px 60px 0; }
+.btn-back { color: var(--text); font-weight: 600; font-size: 16px; }
+
+.detail-wrap { 
+    padding: 20px 60px 60px; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 40px; 
 }
 
-.btn-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--neon); 
-  font-weight: 600;
-  font-size: 14px;
-  transition: transform 0.2s ease, color 0.2s ease;
-  text-decoration: none;
+/* Header Info Venue */
+.venue-header h1 { font-size: 32px; color: var(--text); margin-bottom: 8px; }
+.venue-address { color: var(--muted); font-size: 16px; margin-bottom: 24px; }
+.venue-desc h3 { margin-bottom: 12px; color: var(--text); }
+.venue-desc p { color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+
+/* --- Gallery 3 Slot (1 Besar Kiri, 2 Kecil Kanan) --- */
+.venue-gallery { 
+    display: grid; 
+    grid-template-columns: 2fr 1fr; 
+    grid-template-rows: 200px 200px; 
+    gap: 16px; 
+    margin-bottom: 24px; 
+}
+.gallery-img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    border-radius: 16px; 
+    background-color: #E2E4E5;
+}
+.img-main { 
+    grid-row: 1 / span 2; /* Mengambil 2 baris penuh di kiri */
 }
 
-.btn-back i {
-  font-size: 12px;
+/* --- Fasilitas (Berbentuk Button) --- */
+.facilities { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 12px; 
+}
+.facility-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 12px;
+    font-size: 14px; 
+    font-weight: 500; 
+    color: var(--backcolor-soft); 
+    background: var(--neon);
+}
+.facility-icon { 
+    width: 20px; 
+    height: 20px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.facility-icon svg {
+    width: 100%;
+    height: 100%;
 }
 
-.btn-back:hover {
-  color: var(--neon-dim);
-  transform: translateX(-5px); 
+/* --- Layout Booking (Bersebelahan) --- */
+.booking-section h2 { margin-bottom: 16px; color: var(--text); }
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--text);
+    padding-bottom: 12px;
+}
+.booking-header h2 {
+    margin: 0;
+    color: var(--text);
+}
+.selected-date-label {
+    margin: 0;
+    font-size: 18px;
+    color: var(--backcolor-soft);
+    padding: 8px 16px;
+    background: var(--neon);
+    border-radius: 12px;
+    font-weight: 600;
+}
+.booking-content {
+    display: grid;
+    grid-template-columns: 320px 1fr; /* Kalender 320px, sisanya untuk lapangan */
+    gap: 32px;
+    align-items: start;
 }
 
-/* .breadcrumb {
-  padding-top: 10px !important; 
+/* --- Styling Grid Kalender Inline (Halaman Detail) --- */
+.inline-calendar {
+    background: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    position: sticky; 
+    top: 20px;
+}
+.inline-calendar .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+.inline-calendar .calendar-header button {
+    background: var(--backcolor-soft);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.inline-calendar .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+}
+.inline-calendar .day-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+.inline-calendar .date-cell {
+    padding: 8px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    background: var(--neon-dim);
+    color: var(--backcolor-soft);
+    transition: 0.2s ease;
+}
+.inline-calendar .date-cell:hover:not(.past):not(.empty) {
+    background: var(--neon);
+    color: #fff;
+}
+.inline-calendar .date-cell.past {
+    color: #fff;
+    background: var(--line);
+    pointer-events: none;
+}
+/* Memperbaiki logic warna kalender lewat class */
+.inline-calendar .date-cell.selected {
+    background: var(--neon) !important;
+    color: #fff !important;
+    font-weight: bold;
+    transform: scale(1.05);
 }
 
-/* .breadcrumb {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 60px 0;
-  color: var(--muted);
-  font-size: 13px;
+/* --- Court Accordion & Slots --- */
+.court-item { 
+    border: none; 
+    border-radius: 12px; 
+    margin-bottom: 16px; 
+    overflow: hidden; 
+    background: #fff; 
 }
-.breadcrumb a:hover { color: var(--neon); } */
-
-.detail-wrap {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 28px 60px 70px;
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 40px;
+.court-header { 
+    padding: 16px 24px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
 }
 
-.court-hero-img {
-  height: 380px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #3a3f47;
-  margin-bottom: 26px;
+.court-header h4 { margin: 0; font-size: 18px; color: var(--text); }
+.court-header span { font-size: 14px; color: var(--muted); font-weight: normal; margin-left: 8px; }
+
+.btn-cek-jadwal { 
+    background: var(--neon-dim); 
+    border: none; 
+    color: var(--backcolor-soft); 
+    padding: 8px 16px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: 600; 
 }
-.court-hero-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.btn-cek-jadwal:hover { background: var(--neon); }
+
+.court-body-expand {
+    display: none;
+    border-top: 1px solid var(--line);
+    background: var(--backcolor-soft);
+    padding: 24px;
+}
+.court-item.expanded .court-body-expand { 
+    display: block; 
 }
 
-.court-previews {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 26px;
+/* Court Slots */
+.court-slots { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+    gap: 12px; 
+    margin-bottom: 24px;
 }
+.slot-btn { 
+    padding: 8px; 
+    border: 1px solid var(--line); 
+    border-radius: 8px; 
+    background: #fff; 
+    text-align: center; 
+    cursor: pointer; 
+    color: var(--text); 
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.slot-time { font-size: 14px; font-weight: 600; }
+.slot-price { font-size: 12px; }
 
-.preview-thumb {
-  height: 110px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #3a3f47;
-  cursor: pointer;
-  transition: filter 0.2s ease, transform 0.2s ease;
-}
-.preview-thumb:hover {
-  filter: brightness(1.15);
-  transform: translateY(-2px);
-}
-.preview-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.slot-btn:hover:not(.booked) { border-color: var(--neon); color: var(--neon); }
+.slot-btn.selected { background: var(--neon); color: #fff; border-color: var(--neon); }
+.slot-btn.booked { background: #E2E4E5; color: #A3A3A3; pointer-events: none; border-color: transparent; }
 
-.court-title {
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-  margin-bottom: 6px;
+/* Action Buttons */
+.court-action {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 16px;
 }
-.court-loc {
-  color: var(--muted);
-  font-size: 15px;
-  margin-bottom: 28px;
+.btn-konfirmasi {
+    background: var(--neon);
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
 }
-.court-loc::before { content: "📍 "; }
-
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 14px;
-}
-
-.about-text {
-  color: #c0c4cc;
-  font-size: 15px;
-  margin-bottom: 30px;
-}
-
-.amenities {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px 20px;
-  list-style: none;
-}
-.amenities li {
-  background: var(--backcolor-soft);
-  border: 1px solid var(--line);
-  padding: 12px 14px;
-  border-radius: 10px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.amenities li::before { content: "✓"; color: var(--neon); font-weight: 700; }
-
-.booking-widget {
-  background: var(--backcolor-soft);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 26px;
-  position: sticky;
-  top: 24px;
-  height: fit-content;
-}
-
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 22px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
-}
-.price-row .price { font-size: 24px; font-weight: 800; }
-.price-row .price small { color: var(--muted); font-weight: 400; font-size: 13px; }
-.rating { color: var(--neon); font-size: 14px; font-weight: 600; }
-
-.calendar-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.calendar-head h4 { font-size: 15px; font-weight: 700; }
-.calendar-nav { display: flex; gap: 6px; }
-.calendar-nav button {
-  background: transparent;
-  border: 1px solid #3a3f47;
-  color: var(--text);
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 24px;
-}
-.day-label {
-  text-align: center;
-  font-size: 11px;
-  color: var(--muted);
-  text-transform: uppercase;
-  padding: 6px 0;
-}
-.date-cell {
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: #ebebeb;
-  color: var(--text);
-  transition: background 0.15s ease;
-}
-.date-cell:hover { background: var(--line); }
-.date-cell.muted { color: var(--text); cursor: default; }
-.date-cell.muted:hover { background: transparent; }
-.date-cell.past {
-  color: var(--text);
-  background: transparent;
-  cursor: not-allowed;
-}
-.date-cell.past:hover { background: transparent; }
-a.date-cell.today {
-  border: 1px solid var(--neon);
-  color: var(--neon);
-  font-weight: 600;
-}
-
-/* court-1 is the default; courts 2/3/4 are hidden until targeted */
-.court-section { display: none; }
-#court-1 { display: block; }
-
-/* Hide court-1 when court 2/3/4 (or their slots) are active */
-body:has(#court-2:target) #court-1,
-body:has(#court-3:target) #court-1,
-body:has(#court-4:target) #court-1,
-body:has(#c2-slots-26:target) #court-1, body:has(#c2-slots-27:target) #court-1,
-body:has(#c2-slots-28:target) #court-1, body:has(#c2-slots-29:target) #court-1,
-body:has(#c2-slots-30:target) #court-1,
-body:has(#c3-slots-26:target) #court-1, body:has(#c3-slots-27:target) #court-1,
-body:has(#c3-slots-28:target) #court-1, body:has(#c3-slots-29:target) #court-1,
-body:has(#c3-slots-30:target) #court-1,
-body:has(#c4-slots-26:target) #court-1, body:has(#c4-slots-27:target) #court-1,
-body:has(#c4-slots-28:target) #court-1, body:has(#c4-slots-29:target) #court-1,
-body:has(#c4-slots-30:target) #court-1 { display: none; }
-
-/* Show court-2 when it or its slots are targeted */
-body:has(#court-2:target) #court-2,
-body:has(#c2-slots-26:target) #court-2, body:has(#c2-slots-27:target) #court-2,
-body:has(#c2-slots-28:target) #court-2, body:has(#c2-slots-29:target) #court-2,
-body:has(#c2-slots-30:target) #court-2 { display: block; }
-
-/* Show court-3 when it or its slots are targeted */
-body:has(#court-3:target) #court-3,
-body:has(#c3-slots-26:target) #court-3, body:has(#c3-slots-27:target) #court-3,
-body:has(#c3-slots-28:target) #court-3, body:has(#c3-slots-29:target) #court-3,
-body:has(#c3-slots-30:target) #court-3 { display: block; }
-
-/* Show court-4 when it or its slots are targeted */
-body:has(#court-4:target) #court-4,
-body:has(#c4-slots-26:target) #court-4, body:has(#c4-slots-27:target) #court-4,
-body:has(#c4-slots-28:target) #court-4, body:has(#c4-slots-29:target) #court-4,
-body:has(#c4-slots-30:target) #court-4 { display: block; }
-
-body:has(#c1-slots-26:target) a[href="#c1-slots-26"],
-body:has(#c1-slots-27:target) a[href="#c1-slots-27"],
-body:has(#c1-slots-28:target) a[href="#c1-slots-28"],
-body:has(#c1-slots-29:target) a[href="#c1-slots-29"],
-body:has(#c1-slots-30:target) a[href="#c1-slots-30"],
-body:has(#c2-slots-26:target) a[href="#c2-slots-26"],
-body:has(#c2-slots-27:target) a[href="#c2-slots-27"],
-body:has(#c2-slots-28:target) a[href="#c2-slots-28"],
-body:has(#c2-slots-29:target) a[href="#c2-slots-29"],
-body:has(#c2-slots-30:target) a[href="#c2-slots-30"],
-body:has(#c3-slots-26:target) a[href="#c3-slots-26"],
-body:has(#c3-slots-27:target) a[href="#c3-slots-27"],
-body:has(#c3-slots-28:target) a[href="#c3-slots-28"],
-body:has(#c3-slots-29:target) a[href="#c3-slots-29"],
-body:has(#c3-slots-30:target) a[href="#c3-slots-30"],
-body:has(#c4-slots-26:target) a[href="#c4-slots-26"],
-body:has(#c4-slots-27:target) a[href="#c4-slots-27"],
-body:has(#c4-slots-28:target) a[href="#c4-slots-28"],
-body:has(#c4-slots-29:target) a[href="#c4-slots-29"],
-body:has(#c4-slots-30:target) a[href="#c4-slots-30"] {
-  background: var(--neon);
-  color: var(--backcolor);
-  font-weight: 700;
-  border: none;
-}
-
-.slots-wrap { margin-bottom: 20px; }
-
-.slots-prompt {
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-  padding: 18px 14px;
-  border: 1px dashed #3a3f47;
-  border-radius: 10px;
-}
-body:has(.slot-group:target) .slots-prompt { display: none; }
-
-.slot-group { display: none; }
-.slot-group:target { display: block; }
-.slot-group .slots-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 10px;
-}
-
-.slots { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-.slot-option { display: contents; }
-
-.court-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-.court-tab {
-  flex: 1;
-  text-align: center;
-  padding: 7px 4px;
-  border-radius: 8px;
-  border: 1px solid #3a3f47;
-  font-size: 12px;
-  cursor: pointer;
-  color: var(--muted);
-  user-select: none;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-}
-.court-tab:hover { border-color: var(--neon); color: var(--text); }
-
-.court-slots { display: none; }
-.court-slots .slots { margin-bottom: 0; }
-
-.slot-group input:nth-of-type(1):checked ~ div:nth-of-type(2) { display: block; }
-.slot-group input:nth-of-type(2):checked ~ div:nth-of-type(3) { display: block; }
-.slot-group input:nth-of-type(3):checked ~ div:nth-of-type(4) { display: block; }
-
-.slot-group input:nth-of-type(1):checked ~ .court-tabs .court-tab:nth-child(1),
-.slot-group input:nth-of-type(2):checked ~ .court-tabs .court-tab:nth-child(2),
-.slot-group input:nth-of-type(3):checked ~ .court-tabs .court-tab:nth-child(3) {
-  background: var(--neon);
-  color: var(--backcolor);
-  border-color: var(--neon);
-  font-weight: 700;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-.slot {
-  background: #ebebeb;
-  padding: 8px 14px;
-  border-radius: 999px;
-  color: var(--text);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-}
-.slot:hover { border-color: var(--neon); }
-.slot-option input:checked + .slot {
-  background: var(--neon);
-  color: var(--backcolor);
-  border-color: var(--neon);
-  font-weight: 700;
-}
-.slot.taken {
-  color: var(--muted);
-  background: transparent;
-  text-decoration: line-through;
-  cursor: not-allowed;
-  border: 1px solid #2e323a;
-}
-.booking-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  border-top: 1px solid var(--line);
-  padding-top: 20px;
-}
-.booking-form label {
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.booking-form input {
-  background: var(--backcolor);
-  border: 1px solid #3a3f47;
-  color: var(--text);
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-}
-.booking-form input:focus { border-color: var(--neon); }
-.field { display: flex; flex-direction: column; gap: 5px; }
-.confirm-btn { margin-top: 8px; padding: 14px; font-size: 15px; width: 100%; }
+.btn-konfirmasi:disabled { background: var(--line); cursor: not-allowed; opacity: 0.7; }
 
 /* ─── Auth Page ─────────────────────────────────────────── */
 
-.auth-page { display: flex; flex-direction: column; min-height: 100vh; }
+/* Container Utama Full Screen */
+.auth-page {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  background: var(--backcolor);
+  height: 1024px
+}
 
-.auth-wrap {
-  flex: 1;
+/* Sisi Kiri: Gambar Background */
+.auth-hero {
+  width: 50%; 
+  background: url('../assets/images/login-bg.png') center 100% no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 60px;
+}
+
+.auth-hero h2 {
+  color: var(--text);  
+  font-size: 50px;
+  font-weight: 700;
+  margin-top: 25%;
+  margin-bottom: 8px;
+  max-width: 550px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.auth-hero p {
+  color: var(--text);
+  font-size: 20px;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+/* Sisi Kanan */
+.auth-form-side {
+  width: 50%;
+  max-width: 720px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
 }
 
-.auth-card {
-  background: var(--backcolor-soft);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 40px;
+.auth-form-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px; 
+  background: #ffffff; 
+  border-radius: 20px;
+  padding: 40px; 
+  box-shadow: 0 8px 24px rgba(24, 57, 136, 0.04); 
 }
 
-.auth-header { text-align: center; margin-bottom: 32px; }
+/* Teks Header Form */
+.auth-header { text-align: left; margin-bottom: 32px; }
 
 .auth-logo {
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  text-align: center;
 }
 .auth-logo span { color: var(--neon); }
 
 .auth-header h1 {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  text-align: center;
 }
-.auth-header p { color: var(--muted); font-size: 14px; }
 
+/* Input Fields */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-bottom: 24px;
 }
+
 .auth-form .field label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+  margin-bottom: 8px;
 }
-.forgot-link { color: var(--neon); font-size: 12px; text-transform: none; letter-spacing: 0; }
-.forgot-link:hover { text-decoration: underline; }
 
 .auth-form input {
   width: 100%;
-  background: var(--backcolor);
-  border: 1px solid #3a3f47;
+  background: var(--line);
+  border: none;
   color: var(--text);
-  padding: 12px 14px;
-  border-radius: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
   font-size: 15px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: 0.2s;
 }
-.auth-form input:focus { border-color: var(--neon); }
 
-.auth-submit { width: 100%; padding: 14px; font-size: 15px; margin-top: 4px; }
-
-.auth-divider {
+/* Wrapper Icon Mata */
+.password-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 12px;
-  margin-bottom: 16px;
-}
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--line);
 }
 
-.btn-social {
-  width: 100%;
-  background: var(--backcolor);
-  border: 1px solid #3a3f47;
-  color: var(--text);
-  padding: 12px;
-  font-size: 14px;
+.password-wrapper input {
+  padding-right: 48px; 
+}
+
+.btn-toggle-pass {
+  position: absolute;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 24px;
+  padding: 0;
+  transition: 0.2s;
 }
-.btn-social:hover { border-color: #5a5f68; transform: translateY(-1px); }
+.btn-toggle-pass:hover { color: var(--text); }
+
+/* Tombol Submit & Footer */
+.auth-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; margin-top: 8px; }
 
 .auth-footer {
-  text-align: center;
+  text-align: left;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .auth-footer a { color: var(--neon); font-weight: 600; }
 .auth-footer a:hover { text-decoration: underline; }
 
+/* ─── Halaman Riwayat Pesanan ───────────────────────────── */
+
+.riwayat-wrap {
+    padding: 20px 60px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 24px;
+}
+
+/* Tabs Filter */
+.tabs {
+    display: inline-flex;
+    width: 100%;
+    background: var(--backcolor-soft);
+    padding: 6px;
+    border-radius: 14px; 
+    gap: 20px;
+    margin-bottom: 24px;
+    border: none; 
+}
+
+.tab-btn {
+    background: var(--neon-dim);
+    border: none;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--backcolor-soft);
+    border-radius: 10px; /* Sudut membulat untuk setiap tombol */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    bottom: 0; 
+}
+
+.tab-btn.active {
+    background: var(--neon); 
+    color: var(--backcolor-soft); 
+    box-shadow: 0 2px 8px rgba(24, 57, 136, 0.08); 
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--backcolor-soft); 
+}
+
+/* Daftar Kartu */
+.bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.booking-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.booking-code {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* Badge Status (Merah, Hijau, Kuning) */
+.badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-success { background: var(--neon-dim); color: var(--backcolor-soft); } /* Hijau untuk Selesai */
+.badge-danger  { background: #b60900; color: var(--backcolor-soft); } /* Merah untuk Batal/Expired */
+.badge-pending { background: #da803f; color: var(--backcolor-soft); } /* Kuning untuk Menunggu */
+
+/* Detail Teks Pesanan */
+.booking-details {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.booking-details strong {
+    color: var(--text);
+}
+
+.booking-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+}
+
+.btn-pay {
+    background: var(--neon);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-pay:hover { background: var(--neon-dim); }
+
+@media (max-width: 900px) {
+    .riwayat-wrap { padding: 20px 24px; }
+    .tabs { overflow-x: auto; white-space: nowrap; }
+}
 
 /* ─── Responsive ────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .auth-page { flex-direction: column; }
+  .auth-form-side { width: 100%; max-width: none; padding: 24px; }
+  .auth-hero { padding: 40px 24px; min-height: 250px; flex: none; }
+}
+
+@media (max-width: 900px) {
+  .auth-split-container { flex-direction: column; max-width: 420px; }
+  .auth-hero { padding: 30px; min-height: 200px; }
+}
 
 @media (max-width: 900px) {
   .navbar, .footer { padding-left: 24px; padding-right: 24px; }
