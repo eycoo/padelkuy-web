@@ -14,11 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
             errorDiv.style.display = 'none';
 
             try {
-                try {
                 const response = await fetch('/api/login.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
+                    credentials: 'include', // <--- TAMBAHKAN BARIS INI
                     body: JSON.stringify({ email, password })
                 });
 
