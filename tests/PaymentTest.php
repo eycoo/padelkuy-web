@@ -33,6 +33,24 @@ final class PaymentTest extends TestCase
         $this->assertSame('paid', getBooking($this->pdo, $bid)['status']);
     }
 
+    public function test_amount_charged_matches_the_schedule_aware_quote(): void
+    {
+        // Court with a schedule priced above the flat venue rate (100000).
+        $this->pdo->exec(
+            "INSERT INTO court_schedules (court_id, day_band, start_hour, end_hour, price)
+             VALUES (1, 'everyday', 7, 22, 250000)"
+        );
+
+        $bid = createBooking($this->pdo, 1, 1, $this->date, 18, 20); // 2h * 250000
+
+        $payment = payForBooking($this->pdo, 1, $bid);
+
+        // Charged the schedule price, not the flat venue rate (2 * 100000).
+        $this->assertSame(500000, $payment['amount']);
+        // ... and it agrees with the price the customer was quoted.
+        $this->assertSame(getBooking($this->pdo, $bid)['price'], $payment['amount']);
+    }
+
     public function test_only_the_owner_can_pay(): void
     {
         $bid = createBooking($this->pdo, 1, 1, $this->date, 18, 20); // Alice's
