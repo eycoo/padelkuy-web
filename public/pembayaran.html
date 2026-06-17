@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pembayaran — PadelKuy</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Padel<span>Kuy</span></div>
+    <div id="nav-actions"></div>
+  </nav>
+
+  <div class="back-container">
+    <a href="riwayat.html" class="btn-back">&lt; Kembali</a>
+  </div>
+
+  <main class="payment-wrap" id="view-payment">
+    <div class="payment-split-container">
+      
+      <div class="payment-left">
+        <div class="payment-header">
+          <h1>Menunggu Pembayaran</h1>
+          <p id="countdown-timer" class="countdown-text">Sisa waktu: 15:00</p>
+        </div>
+
+        <div class="payment-details-list">
+          <div class="detail-row">
+            <span class="muted">Kode Pesanan</span>
+            <strong id="val-code">Memuat...</strong>
+          </div>
+          <div class="detail-row">
+            <span class="muted">Venue</span>
+            <strong id="val-venue">-</strong>
+          </div>
+          <div class="detail-row">
+            <span class="muted">Lapangan</span>
+            <strong id="val-court">-</strong>
+          </div>
+          <div class="detail-row">
+            <span class="muted">Jadwal</span>
+            <strong id="val-date">-</strong>
+          </div>
+          <div class="detail-row">
+            <span class="muted">Waktu</span>
+            <strong id="val-time">-</strong>
+          </div>
+        </div>
+
+        <div class="payment-total">
+          <span class="muted" style="color: rgba(255,255,255,0.9);">Total Pembayaran</span>
+          <strong class="total-price-text" id="val-price">Rp 0</strong>
+        </div>
+      </div>
+
+      <div class="payment-right">
+        <div class="qris-box">
+          <h3 style="margin-bottom: 16px; color: var(--text);">Scan QRIS</h3>
+          <div class="qris-img-wrapper">
+            <img src="../assets/images/qris-dummy.webp" alt="Scan QRIS">
+          </div>
+          <p class="muted" style="font-size: 13px; margin-bottom: 24px; text-align: center;">
+            Buka aplikasi e-wallet atau M-Banking kamu lalu scan kode QR di atas.
+          </p>
+          
+          <div id="payment-error" style="color: red; font-size: 14px; display: none; margin-bottom: 12px; text-align: center;"></div>
+          
+          <button class="btn btn-primary btn-full" id="btn-pay">Cek Status Pembayaran</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <main class="payment-wrap" id="view-success" style="display: none; text-align: center; padding-top: 60px;">
+    <div class="success-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    </div>
+    <h1 class="page-title" style="margin-top: 24px; margin-bottom: 8px;">Pembayaran Berhasil!</h1>
+    <p class="muted" style="margin-bottom: 32px;">Pesanan lapanganmu sudah dikonfirmasi.</p>
+    <a href="riwayat.html" class="btn btn-primary">Lihat Riwayat Pesanan</a>
+  </main>
+
+  <script src="main.js"></script>
+  <script src="pembayaran.js"></script>
+</body>
+</html>
