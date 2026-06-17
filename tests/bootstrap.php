@@ -12,6 +12,7 @@ require_once __DIR__ . '/../lib/courts.php';
 require_once __DIR__ . '/../lib/availability.php';
 require_once __DIR__ . '/../lib/bookings.php';
 require_once __DIR__ . '/../lib/payments.php';
+require_once __DIR__ . '/../lib/receipt.php';
 
 (function () {
     $host = getenv('DB_HOST') ?: '127.0.0.1';
