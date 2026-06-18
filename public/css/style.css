@@ -8,7 +8,12 @@
   --line: #B8E9CD;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; 
+    -ms-overflow-style: none;
+    scrollbar-width: none;}
+*::-webkit-scrollbar {
+    display: none;
+}
 
 body {
   font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -30,13 +35,6 @@ a { color: inherit; text-decoration: none; }
 
 .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
 .logo span { color: var(--neon); }
-
-/* Layout Navbar Actions */
-#nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
 
 /* Layout Navbar Actions */
 #nav-actions {
@@ -383,93 +381,92 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Jarak untuk Grid Venue agar sejajar dengan header */
+/* Jarak untuk Grid Venue agar sejajar dengan header */
 .venue-grid {
-    width: 80%;
-    max-width: 1152px;
-    margin: 0 auto; /* Tengah */
-    padding: 0 0 60px 0;
-    
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-}
-
-.courts {
-  padding: 30px 60px 80px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.courts-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 28px;
-}
-.courts-header h2 { font-size: 28px; font-weight: 700; }
-.courts-header .link { color: var(--neon); font-size: 14px; font-weight: 600; }
-
-.court-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .court-card {
-  background: var(--backcolor-soft);
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid #2e323a;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+    background: #ffffff;
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
 }
+
 .court-card:hover {
-  border-color: var(--neon);
-  transform: translateY(-3px);
+    border-color: var(--neon);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(24, 57, 136, 0.08); /* Tambahan shadow halus saat di-hover */
 }
 
 .court-image {
-  height: 160px;
-  overflow: hidden;
-  background: #3a3f47;
+    width: 100%;
+    height: 200px; 
+    overflow: hidden;
+    border-radius: 16px 16px 0 0; 
 }
+
 .court-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
 }
-.court-card:hover .court-image img { transform: scale(1.05); }
+
+.court-card:hover .court-image img { 
+    transform: scale(1.05); 
+}
 
 .court-body {
-  padding: 18px 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
+    padding: 18px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
 }
-.court-body h3 { font-size: 17px; font-weight: 700; }
-.court-tag { font-size: 12px; color: var(--muted); }
+
+.court-body h3 { 
+    font-size: 17px; 
+    font-weight: 700; 
+    margin: 0;
+}
+
+.court-tag { 
+    font-size: 12px; 
+    color: var(--muted); 
+}
 
 .court-foot {
-  margin-top: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    margin-top: auto; 
+    padding-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.price { font-size: 16px; font-weight: 700; }
-.price small { color: var(--muted); font-weight: 400; font-size: 12px; }
+
+.price { 
+    font-size: 16px; 
+    font-weight: 700; 
+    color: var(--neon);
+}
 
 .empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px;
-  color: var(--muted);
-  font-size: 16px;
-  background: white;
-  border-radius: 12px;
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 16px;
+    background: white;
+    border-radius: 12px;
 }
 
 /* ─── Detail Page ───────────────────────────────────────── */
@@ -985,18 +982,6 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-pay:hover { background: var(--neon-dim); }
 
-.btn-receipt {
-    display: inline-block;
-    background: var(--text);
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    transition: 0.2s;
-}
-.btn-receipt:hover { opacity: 0.85; }
 /* ─── Halaman Pembayaran (Split Layout) ─────────────────── */
 
 .payment-wrap {
@@ -1101,17 +1086,6 @@ a { color: inherit; text-decoration: none; }
 .btn-full { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; }
 
 /* Styling Halaman Admin Dashboard */
-.badge-admin {
-    background: #E63946;
-    color: white;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    vertical-align: middle;
-    margin-left: 8px;
-    letter-spacing: 1px;
-}
-
 .admin-dashboard {
     padding: 20px 60px 80px;
     max-width: 1400px;
@@ -1122,65 +1096,29 @@ a { color: inherit; text-decoration: none; }
     align-items: start;
 }
 
+.admin-panel.admin-venue-section {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+}
+
 .admin-panel {
-    background: #ffffff;
+    background: var(--backcolor-soft);
     border-radius: 20px;
     padding: 32px;
     box-shadow: 0 4px 20px rgba(24, 57, 136, 0.04);
-    border: 1px solid var(--line);
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-bottom: 8px;
-}
-
-.admin-input {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    background: #F8FAFC;
-    font-family: inherit;
-    font-size: 14px;
-    color: var(--text);
-    outline: none;
-    transition: 0.2s;
-}
-
-.admin-input:focus { 
-    border-color: var(--neon); 
-    background: #fff; 
-}
-
-.court-admin-card {
-    border: 1px solid var(--line);
-    padding: 16px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #F8FAFC;
+    border: none;
 }
 
 /* Tabel Admin */
-.table-responsive { 
-    overflow-x: auto; 
-}
+.table-responsive { overflow-x: auto; }
 
 .admin-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
 }
-
 .admin-table th {
     text-align: left;
     padding: 12px 16px;
@@ -1188,14 +1126,12 @@ a { color: inherit; text-decoration: none; }
     font-weight: 600;
     border-bottom: 2px solid var(--line);
 }
-
 .admin-table td {
     padding: 16px;
     border-bottom: 1px solid #F1F5F9;
     color: var(--text);
     vertical-align: middle;
 }
-
 .btn-cancel {
     background: #FFEBEE;
     color: #C62828;
@@ -1209,16 +1145,31 @@ a { color: inherit; text-decoration: none; }
 
 /* Inline Editable */
 .editable-text {
-    padding: 4px 8px;
-    margin-left: -8px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    transition: 0.2s;
+    background-color: var(--backcolor-soft);
+    color: var(--text);
+    padding: 14px 48px 14px 16px; 
+    border-radius: 12px;
+    border: 2px solid transparent;
     outline: none;
+    transition: 0.2s;
+    display: block; 
+    min-height: 24px;
+    line-height: 1.5;
+    
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23183988' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'%3E%3C/path%3E%3Cpath d='M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center; 
+    cursor: pointer;
 }
-.editable-text:hover { border-color: var(--line); background: #f8fafc; }
-.editable-text:focus { border-color: var(--neon); background: #fff; cursor: text; }
+.editable-text:hover { 
+    border-color: var(--neon); 
 
+}
+.editable-text:focus { 
+    background-color: #fff; 
+    border-color: var(--neon);
+    cursor: text;
+}
 .section-label { 
     font-size: 12px; 
     font-weight: 700; 
@@ -1230,97 +1181,193 @@ a { color: inherit; text-decoration: none; }
 
 /* Image Grid */
 .image-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
+    display: flex; 
+    flex-direction: column; 
     gap: 12px; 
+    width: 100%;
 }
 .image-slot {
-    aspect-ratio: 16/9;
-    background: #f1f5f9;
-    border: 1px dashed var(--line);
-    border-radius: 8px;
+    height: 56px; 
+    background: var(--backcolor-soft);
+    border: 2px dashed var(--text);
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 12px;
+    justify-content: flex-start;
+    padding: 0 20px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: 0.2s;
 }
-.image-slot:hover { background: #e2e8f0; }
 
-/* Facilities Chips */
-.facility-wrapper { 
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: 8px; 
-    align-items: center; 
+.image-slot:hover { 
+    background: #fff;
+    border-color: var(--neon);
+    color: var(--neon);
 }
-.chip-container { 
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: 8px; 
-}
-.chip { 
-    background: var(--neon); 
-    color: #fff; 
-    padding: 4px 12px; 
-    border-radius: 16px; 
-    font-size: 13px; 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-}
-.btn-remove-chip { 
-    background: transparent; 
-    border: none; 
-    color: #fff; 
-    cursor: pointer; 
-    font-weight: bold; 
-}
-.ghost-input { 
-    border: none; 
-    outline: none; 
-    background: transparent; 
-    font-size: 14px; 
-    width: 80px; 
+/* Layout List Fasilitas */
+.facility-grid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-/* Court & Schedule Nested Box */
-.court-card { 
-    border: 1px solid var(--line); 
-    padding: 16px; 
-    border-radius: 12px; 
-    margin-bottom: 16px; 
-    background: #fff; 
+/* Kotak putus-putus untuk tombol Add */
+.dashed-add-btn {
+    height: 56px;
+    background: transparent;
+    border: 2px dashed var(--text);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
 }
-.court-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 16px; 
+
+.dashed-add-btn:hover {
+    border-color: var(--neon);
+    background: #fff;
 }
-.schedule-row { 
-    display: grid; 
-    grid-template-columns: 2fr 1fr 1fr 2fr auto; 
-    gap: 8px; 
-    margin-bottom: 8px; 
-    align-items: center; 
+
+/* Efek hover pada SVG ikon plus agar warnanya ikut berubah */
+.dashed-add-btn:hover svg {
+    stroke: var(--neon);
 }
-.schedule-input { 
-    padding: 6px 8px; 
-    border: 1px solid var(--line); 
-    border-radius: 6px; 
-    font-size: 13px; 
-    width: 100%; 
+
+/* Admin Court & Schedule Nested Box (Class Baru) */
+.admin-court-card { 
+    position: relative; 
+    background: #fff;
+    padding: 24px;
+    border-radius: 20px;
+    margin-bottom: 20px;
 }
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
+
+/* Tombol Hapus Pojok Kanan Atas */
+.btn-delete-court {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #FFEBEE;
+    color: #C62828;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.court-header {
+    margin-bottom: 20px;
+    padding-right: 120px;
+}
+.schedule-capsule-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.schedule-pill {
+    background: var(--backcolor-soft);
+    border: 1px dashed var(--neon-dim);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    position: relative;
+}
+.pill-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #183988;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+}
+select.pill-input {
+    appearance: none;
     -webkit-appearance: none;
-    margin: 0;
 }
-input[type="number"] {
-    -moz-appearance: textfield;
+.btn-add-schedule {
+    height: 48px;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 2px dashed var(--neon);
+    border-radius: 12px;
+    color: var(--neon);
+    cursor: pointer;
+}
+.btn-add-schedule:hover { background: #f0f9ff; }
+.btn-x {
+    background: #ec4754;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+.save-container {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid var(--text);
+}
+
+/* Tombol Simpan (Dibuat tidak full-width agar lebih manis) */
+.btn-save-venue {
+    padding: 16px 64px;
+    font-size: 16px;
+    border-radius: 12px;
+    background: var(--neon);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-save-venue:hover {
+    background: var(--neon-dim);
+}
+
+/* Memastikan tombol tambah lapangan konsisten */
+.dashed-add-btn {
+    width: 100%;
+    height: 56px;
+    background: transparent;
+    border: 2px dashed var(--text);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.dashed-add-btn:hover {
+    background: #fff;
+    border-color: var(--neon);
 }
 
 /* Responsivitas Layar Kecil */
@@ -1330,30 +1377,19 @@ input[type="number"] {
 }
 
 @media (max-width: 900px) {
-    .payment-wrap { padding: 20px 24px 60px; }
-    .payment-split-container { flex-direction: column; }
-    .payment-left { border-right: none; border-bottom: 1px dashed var(--line); padding: 24px; }
-    .payment-right { padding: 32px 24px; }
-    .qris-img-wrapper { width: 200px; height: 200px; }
-}
-
-@media (max-width: 900px) {
-    .riwayat-wrap { padding: 20px 24px; }
-    .tabs { overflow-x: auto; white-space: nowrap; }
-}
-
-@media (max-width: 900px) {
+  .payment-wrap { padding: 20px 24px 60px; }
+  .payment-split-container { flex-direction: column; }
+  .payment-left { border-right: none; border-bottom: 1px dashed var(--line); padding: 24px; }
+  .payment-right { padding: 32px 24px; }
+  .qris-img-wrapper { width: 200px; height: 200px; }
+  .riwayat-wrap { padding: 20px 24px; }
+  .tabs { overflow-x: auto; white-space: nowrap; }
   .auth-page { flex-direction: column; }
   .auth-form-side { width: 100%; max-width: none; padding: 24px; }
   .auth-hero { padding: 40px 24px; min-height: 250px; flex: none; }
-}
-
-@media (max-width: 900px) {
   .auth-split-container { flex-direction: column; max-width: 420px; }
   .auth-hero { padding: 30px; min-height: 200px; }
-}
 
-@media (max-width: 900px) {
   .navbar, .footer { padding-left: 24px; padding-right: 24px; }
 
   .hero { padding: 60px 24px 48px; }

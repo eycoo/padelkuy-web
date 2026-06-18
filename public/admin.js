@@ -60,37 +60,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     ];
 
-    // Merender array ke dalam HTML
-    function renderCourts() {
-        if (!courtsWrapper) return;
-        courtsWrapper.innerHTML = courtsData.map((c, i) => `
-            <div class="court-card">
-                <div class="court-header">
-                    <div>
-                        <div class="editable-text" contenteditable="true" style="font-weight: bold; font-size: 16px;" onblur="updateCourt(${i}, 'name', this.innerText)">${c.name}</div>
-                        <div class="editable-text text-muted" contenteditable="true" style="font-size: 13px;" onblur="updateCourt(${i}, 'type', this.innerText)">${c.type}</div>
-                    </div>
-                    <button class="btn-cancel" onclick="removeCourt(${i})">Hapus Lapangan</button>
-                </div>
-                <div class="schedules-container">
-                    ${c.schedules.map((s, j) => `
-                        <div class="schedule-row">
-                            <select class="schedule-input" onchange="updateSchedule(${i}, ${j}, 'day', this.value)">
-                                <option value="EVERYDAY" ${s.day === 'EVERYDAY' ? 'selected' : ''}>EVERYDAY</option>
-                                <option value="MON-FRI" ${s.day === 'MON-FRI' ? 'selected' : ''}>MON-FRI</option>
-                                <option value="SAT-SUN" ${s.day === 'SAT-SUN' ? 'selected' : ''}>SAT-SUN</option>
-                            </select>
-                            <input type="time" class="schedule-input" value="${s.start}" onchange="updateSchedule(${i}, ${j}, 'start', this.value)">
-                            <input type="time" class="schedule-input" value="${s.end}" onchange="updateSchedule(${i}, ${j}, 'end', this.value)">
-                            <input type="number" class="schedule-input" value="${s.price}" placeholder="Harga (mis: 150000)" oninput="updateSchedule(${i}, ${j}, 'price', this.value)">
-                            <button class="btn-cancel" style="padding: 6px;" onclick="removeSchedule(${i}, ${j})">x</button>
-                        </div>
-                    `).join('')}
-                </div>
-                <button class="btn-ghost" style="width: 100%; border: 1px dashed var(--line); margin-top: 8px; padding: 6px;" onclick="addSchedule(${i})">+ Tambah Jadwal</button>
+function renderCourts() {
+    if (!courtsWrapper) return;
+    courtsWrapper.innerHTML = courtsData.map((c, i) => `
+        <div class="admin-court-card">
+            <button class="btn-delete-court" onclick="removeCourt(${i})">Hapus Lapangan</button>
+            
+            <div class="court-header">
+                <div class="editable-text court-name-edit" contenteditable="true" onblur="updateCourt(${i}, 'name', this.innerText)">${c.name}</div>
+                <div class="editable-text court-desc-edit" contenteditable="true" onblur="updateCourt(${i}, 'type', this.innerText)">${c.type}</div>
             </div>
-        `).join('');
-    }
+
+            <div class="schedule-capsule-container">
+                ${c.schedules.map((s, j) => `
+                    <div class="schedule-pill">
+                        <select class="pill-input" onchange="updateSchedule(${i}, ${j}, 'day', this.value)" style="width: 120px;">
+                            <option value="EVERYDAY" ${s.day === 'EVERYDAY' ? 'selected' : ''}>EVERYDAY</option>
+                            <option value="MON-FRI" ${s.day === 'MON-FRI' ? 'selected' : ''}>MON-FRI</option>
+                            <option value="SAT-SUN" ${s.day === 'SAT-SUN' ? 'selected' : ''}>SAT-SUN</option>
+                        </select>
+                        <input type="time" class="pill-input" value="${s.start}" onchange="updateSchedule(${i}, ${j}, 'start', this.value)" style="width: 65px;">
+                        <input type="time" class="pill-input" value="${s.end}" onchange="updateSchedule(${i}, ${j}, 'end', this.value)" style="width: 65px;">
+                        <input type="number" class="pill-input" value="${s.price}" placeholder="Harga" oninput="updateSchedule(${i}, ${j}, 'price', this.value)" style="width: 70px;">
+                        <button class="btn-x" onclick="removeSchedule(${i}, ${j})">x</button>
+                    </div>
+                `).join('')}
+                
+                <button class="btn-add-schedule" onclick="addSchedule(${i})">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
     // Fungsi global agar bisa dipanggil lewat onclick HTML
     window.updateCourt = (index, key, value) => { courtsData[index][key] = value; };
