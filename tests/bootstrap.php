@@ -7,6 +7,7 @@ putenv('DB_NAME=padelkuy_test');
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../lib/http.php';
 require_once __DIR__ . '/../lib/auth.php';
+require_once __DIR__ . '/../lib/ownership.php';
 require_once __DIR__ . '/../lib/venues.php';
 require_once __DIR__ . '/../lib/courts.php';
 require_once __DIR__ . '/../lib/venue_save.php';

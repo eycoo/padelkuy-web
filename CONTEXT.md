@@ -11,8 +11,8 @@ A person with an account who browses venues, books slots, and pays for them. The
 _Avoid_: user (when meaning specifically a booker), member, pelanggan
 
 **Admin**:
-A platform operator who manages venues and courts and oversees every booking. A single global role, seeded into the database — there is no per-venue owner and no self-registration.
-_Avoid_: owner, venue owner, partner, superuser
+The operator of one venue: they manage that venue and its courts and oversee its bookings, and nothing outside it. An admin owns exactly one venue (`venues.owner_id`) and self-registers together with that venue (ADR-0006). Every admin endpoint is scoped to the caller's owned venue. Supersedes the earlier single-global-admin model.
+_Avoid_: superuser, platform admin (an admin is not global); customer
 
 ### Booking and payment
 

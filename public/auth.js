@@ -119,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const name = document.getElementById('admin-name').value;
             const venue = document.getElementById('admin-venue').value;
+            const city = document.getElementById('admin-city').value;
+            const price = document.getElementById('admin-price').value;
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
             const confirmPass = document.getElementById('admin-confirm-password').value;
@@ -135,17 +137,39 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerText = 'Memproses...';
             errorDiv.style.display = 'none';
 
-            // Simulasi pendaftaran dan login otomatis sebagai Admin
-            setTimeout(() => {
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userRole', 'admin');
-                localStorage.setItem('userName', name);
-                
-                // Menyimpan nama venue untuk digunakan di halaman admin
-                localStorage.setItem('adminVenueName', venue); 
+            try {
+                const response = await fetch('/api/register_admin.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name, email, password,
+                        venue_name: venue, city, price_per_hour: Number(price),
+                    }),
+                });
 
-                window.location.href = 'admin.html';
-            }, 1000);
+                if (response.status === 201) {
+                    const data = await response.json();
+                    // register_admin.php already logged us in (session cookie).
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userRole', data.role);
+                    localStorage.setItem('userName', data.name);
+                    window.location.href = 'admin.html';
+                } else if (response.status === 409) {
+                    errorDiv.innerText = 'Email sudah terdaftar.';
+                    errorDiv.style.display = 'block';
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    errorDiv.innerText = err.error || 'Gagal mendaftarkan venue.';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Gagal terhubung ke server.';
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Daftar Sebagai Mitra';
+            }
         });
     }
 });

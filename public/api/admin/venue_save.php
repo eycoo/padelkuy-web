@@ -9,16 +9,21 @@
 require_once __DIR__ . '/../../../config/db.php';
 require_once __DIR__ . '/../../../lib/http.php';
 require_once __DIR__ . '/../../../lib/auth.php';
+require_once __DIR__ . '/../../../lib/ownership.php';
 require_once __DIR__ . '/../../../lib/session.php';
 require_once __DIR__ . '/../../../lib/venue_save.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-require_admin(db());
+$adminId = require_admin(db());
 
 try {
     switch ($method) {
         case 'POST':
-            send_json(saveVenueBundle(db(), null, read_body()), 201);
+            if (ownedVenueId(db(), $adminId) !== null) {
+                send_error('You already own a venue', 409);
+                return;
+            }
+            send_json(saveVenueBundle(db(), null, read_body(), $adminId), 201);
             return;
 
         case 'PUT':
@@ -27,6 +32,7 @@ try {
                 send_error('id is required', 422);
                 return;
             }
+            require_venue_owner(db(), $id);
             send_json(saveVenueBundle(db(), $id, read_body()));
             return;
 

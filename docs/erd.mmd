@@ -1,5 +1,6 @@
 erDiagram
     USERS ||--o{ BOOKINGS : "makes"
+    USERS ||--o| VENUES : "owns (admin)"
     VENUES ||--o{ COURTS : "has"
     VENUES ||--o{ VENUE_FACILITIES : "offers"
     VENUES ||--o{ VENUE_IMAGES : "shows"
@@ -25,6 +26,7 @@ erDiagram
         text description "About"
         varchar image_path "thumbnail"
         varchar main_image_path "hero"
+        int owner_id FK "admin owner (ADR-0006)"
     }
 
     VENUE_FACILITIES {

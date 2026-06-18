@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../../config/db.php';
 require_once __DIR__ . '/../../../lib/http.php';
 require_once __DIR__ . '/../../../lib/auth.php';
+require_once __DIR__ . '/../../../lib/ownership.php';
 require_once __DIR__ . '/../../../lib/session.php';
 require_once __DIR__ . '/../../../lib/courts.php';
 
@@ -21,6 +22,7 @@ try {
                 send_error('venue_id is required', 422);
                 return;
             }
+            require_venue_owner(db(), $venueId);
             send_json(listCourts(db(), $venueId));
             return;
 
@@ -31,6 +33,7 @@ try {
                 send_error('venue_id is required', 422);
                 return;
             }
+            require_venue_owner(db(), $venueId);
             $id = createCourt(db(), $venueId, (string) ($body['label'] ?? ''), (string) ($body['type'] ?? 'indoor'));
             send_json(['id' => $id], 201);
             return;
@@ -41,6 +44,7 @@ try {
                 send_error('id is required', 422);
                 return;
             }
+            require_court_owner(db(), $id);
             $body = read_body();
             updateCourt(db(), $id, (string) ($body['label'] ?? ''), (string) ($body['type'] ?? 'indoor'))
                 ? send_json(['ok' => true])
@@ -53,6 +57,7 @@ try {
                 send_error('id is required', 422);
                 return;
             }
+            require_court_owner(db(), $id);
             deleteCourt(db(), $id)
                 ? send_json(['ok' => true])
                 : send_error('Court not found', 404);

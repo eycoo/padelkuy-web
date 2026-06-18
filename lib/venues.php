@@ -32,7 +32,7 @@ function listVenues(PDO $pdo, ?string $city = null): array
 function getVenue(PDO $pdo, int $id): ?array
 {
     $stmt = $pdo->prepare(
-        'SELECT id, name, city, price_per_hour, tag, description, image_path, main_image_path
+        'SELECT id, name, city, price_per_hour, tag, description, image_path, main_image_path, owner_id
          FROM venues WHERE id = ?'
     );
     $stmt->execute([$id]);
@@ -42,6 +42,7 @@ function getVenue(PDO $pdo, int $id): ?array
     }
     $row['id'] = (int) $row['id'];
     $row['price_per_hour'] = (int) $row['price_per_hour'];
+    $row['owner_id'] = $row['owner_id'] === null ? null : (int) $row['owner_id'];
     $row['facilities'] = listFacilities($pdo, $id);
     $row['images'] = listImages($pdo, $id);
     return $row;
@@ -156,16 +157,16 @@ function validateVenueInput(array $in): array
     ];
 }
 
-// Create a venue. Returns the new id.
-function createVenue(PDO $pdo, array $in): int
+// Create a venue, optionally owned by an admin (ADR-0006). Returns the new id.
+function createVenue(PDO $pdo, array $in, ?int $owner_id = null): int
 {
     [$name, $city, $price, $tag, $description, $image, $mainImage] = validateVenueInput($in);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO venues (name, city, price_per_hour, tag, description, image_path, main_image_path)
-         VALUES (?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO venues (name, city, price_per_hour, tag, description, image_path, main_image_path, owner_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$name, $city, $price, $tag, $description, $image, $mainImage]);
+    $stmt->execute([$name, $city, $price, $tag, $description, $image, $mainImage, $owner_id]);
     return (int) $pdo->lastInsertId();
 }
 

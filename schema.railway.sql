@@ -29,7 +29,9 @@ CREATE TABLE venues (
   tag             VARCHAR(255),
   description     TEXT,                           -- the "About" blurb (admin editor)
   image_path      VARCHAR(255),                   -- thumbnail (customer venue cards)
-  main_image_path VARCHAR(255)                    -- hero image on the detail page
+  main_image_path VARCHAR(255),                   -- hero image on the detail page
+  owner_id        INT NULL,                       -- the admin who owns this venue (ADR-0006); one venue per owner
+  FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- A venue's facility chips (Shower, Parking, ...). Many per venue.

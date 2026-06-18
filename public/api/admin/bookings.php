@@ -6,20 +6,26 @@
 require_once __DIR__ . '/../../../config/db.php';
 require_once __DIR__ . '/../../../lib/http.php';
 require_once __DIR__ . '/../../../lib/auth.php';
+require_once __DIR__ . '/../../../lib/ownership.php';
 require_once __DIR__ . '/../../../lib/session.php';
 require_once __DIR__ . '/../../../lib/bookings.php';
 require_once __DIR__ . '/../../../lib/payments.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-require_admin(db());
+$adminId = require_admin(db());
 
 try {
     switch ($method) {
         case 'GET':
-            $filters = [];
-            if (!empty($_GET['venue_id'])) {
-                $filters['venue_id'] = (int) $_GET['venue_id'];
+            // Scoped to the caller's own venue (ADR-0006), ignoring any
+            // venue_id the client sends. No venue -> no bookings.
+            $owned = ownedVenueId(db(), $adminId);
+            if ($owned === null) {
+                header('X-Total-Count: 0');
+                send_json([]);
+                return;
             }
+            $filters = ['venue_id' => $owned];
             if (!empty($_GET['date'])) {
                 $filters['date'] = (string) $_GET['date'];
             }
@@ -42,6 +48,7 @@ try {
                 send_error('id is required', 422);
                 return;
             }
+            require_booking_owner(db(), $id);
             adminCancelBooking(db(), $id)
                 ? send_json(['ok' => true])
                 : send_error('Booking not found', 404);

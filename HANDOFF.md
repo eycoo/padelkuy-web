@@ -36,11 +36,41 @@ seeded: `user@padelkuy.test` / `user123`.
 - **Stack:** native PHP + MySQL, no fullstack framework, no Node/TypeScript (course constraint). Backend is a JSON API; frontend is plain HTML/CSS/JS calling it with `fetch()`. See `docs/adr/0002-...`.
 - **Default branch is `master`** (the real history). `main` is an unrelated 2-commit stub — ignore it.
 
-## ⏭️ NEXT TASK (planned): Point C — per-venue admin / owner model
+## ✅ DONE: Point C — per-venue admin / owner model (ADR-0006)
 
-The user wants to change the admin model from **one global admin** to **one admin per
-venue** (1 admin owns 1 venue; a venue still has many courts). They will start this in
-a fresh context — this section is the brief.
+Implemented 2026-06-18. The admin model is now **one admin per venue** (1 admin owns 1
+venue, `venues.owner_id`); every `api/admin/*` endpoint is scoped to the caller's venue.
+
+- **Domain:** `CONTEXT.md` Admin entry rewritten; new **ADR-0006** supersedes the
+  global-admin stance.
+- **Schema:** `venues.owner_id INT NULL → users(id) ON DELETE SET NULL` in `schema.sql`
+  + `schema.railway.sql`. Live/managed DBs take the **additive, idempotent** migration
+  `migrations/0006_add_venue_owner.php` (do NOT re-run `schema.railway.sql`). `getVenue`
+  now returns `owner_id`; `createVenue($pdo,$in,$owner_id=null)`; `saveVenueBundle(...,$owner_id=null)`.
+- **Ownership:** `lib/ownership.php` (`ownedVenueId`, `ownsVenue`, `ownsCourt`,
+  `ownsBooking`) + HTTP guards in `lib/session.php` (`require_venue_owner` /
+  `require_court_owner` / `require_booking_owner`, 403 on non-owner).
+- **Endpoints scoped:** `admin/venues.php` (GET lists only own venue; POST blocks a 2nd
+  venue with 409 + sets owner; PUT/DELETE owner-only), `admin/venue_save.php` (POST 409
+  if already owns, PUT owner-only), `admin/courts.php` + `admin/schedules.php`
+  (court→venue ownership), `admin/bookings.php` (GET forced to own venue — no more
+  all-venues list; DELETE booking→venue ownership). `admin/upload.php` stays plain
+  admin-gated (no venue param to scope).
+- **Registration is real:** new `POST /api/register_admin.php` creates the admin user +
+  their venue (owner set) in one transaction and logs them in; `lib/auth.php` gained
+  `registerAdmin()`. `registerai-admin.html` now collects City + Harga; `auth.js`
+  `register-admin-form` calls the endpoint (was a fake `setTimeout`).
+- **Frontend:** `admin.html`/`admin.js` dropped the venue selector — the panel loads
+  "my venue" (`loadMyVenue`), or a blank create-form if the admin has none.
+- **Seed:** four venue admins, one per seed venue (see Demo accounts below).
+- **Tests:** `tests/OwnershipTest.php` (7 tests) — predicate + registerAdmin coverage.
+  Full suite **121 green**.
+
+Follow-ups: regenerate `docs/erd.png` (source updated); run the live migration +
+re-seed/own venues on Railway before the next deploy; reload the local dev `padelkuy`
+DB (`schema.sql` + `seed.sql`) so `owner_id` + the 4 admins exist.
+
+<details><summary>Original Point C brief (for reference)</summary>
 
 **⚠️ This CONTRADICTS the current domain.** `CONTEXT.md` defines Admin as "a single
 global role… there is no per-venue owner" (and explicitly _Avoids_ "owner/venue
@@ -75,6 +105,8 @@ not just the code**:
 (If the user later only wants a *focused view* without changing the model, the cheaper
 "Point B" is FE-only: filter the bookings table by `admin/bookings.php?venue_id=N` —
 the endpoint already supports it.)
+
+</details>
 
 ## Repo layout
 
@@ -132,8 +164,11 @@ Frontend must send `Content-Type: application/json` and include credentials so t
 ### Admin endpoints (all require an admin session)
 
 `login` now returns `role` (`"user"` or `"admin"`). Every endpoint below returns
-**401** if logged out and **403** if logged in as a non-admin. Seed admin:
-`admin@padelkuy.test` / `admin123` (from `seed.sql`).
+**401** if logged out, **403** if logged in as a non-admin, and (ADR-0006) **403** if
+the admin doesn't own the target venue/court/booking. Seed admins (one per venue, all
+`admin123`): `admin@padelkuy.test` (the G club), `admin2@` (Fote), `admin3@` (Padel
+First), `admin4@` (Hobi Padl). Admins self-register via `POST /api/register_admin.php`
+(`{name,email,password,venue_name,city,price_per_hour}` → `201` + session).
 
 | Method + path | Body | Success | Errors |
 |---|---|---|---|
@@ -224,7 +259,7 @@ All BE blockers are merged; these can start whenever Royan picks them up.
 - All backend is merged to `master` and **deployed live** — including the admin-editor BE (#43–#51: venue detail, court schedules, bookings paging, bulk save, upload). The Railway DB has been migrated additively for ADR-0005 (no data loss).
 - **Frontend is wired** (2026-06-18): customer homepage/detail/booking/payment/riwayat and the admin editor all call the API (see "Where things stand"). Brought forward from the `frontend` branch file-by-file — that branch predates the ADR-0005 backend, so a full merge would have reverted `lib/`/`tests/`/`schema*`; only `public/` files were taken. `detail.js`/`admin.js`/`admin.html` were then rewritten to wire the real endpoints. The `frontend` branch is now stale vs `master`.
 - This session's commits on `master`: `e576a1d`/`362c21b` (payment price fix + `priceForRange`), `d7b72f7` (FE refresh from `frontend`), `c95fbf4` (seed demo user), `771b49f` (detail page wired), `c64dde0` (admin editor wired). The live Railway DB also had the demo user inserted via a one-off PDO script (its seed was loaded before that account existed).
-- **Demo accounts:** admin `admin@padelkuy.test`/`admin123`, customer `user@padelkuy.test`/`user123` (both in `seed.sql`/`seed.railway.sql`).
+- **Demo accounts:** four venue admins `admin@`/`admin2@`/`admin3@`/`admin4@padelkuy.test` (all `admin123`, one venue each, ADR-0006), customer `user@padelkuy.test`/`user123` (all in `seed.sql`/`seed.railway.sql`).
 - New docs: `docs/demo-backend.md` (backend demo guide) and `docs/presentation-brief.md` (brief for generating slides). Not yet committed at time of writing — commit if keeping.
 - Remaining FE polish (not blockers): the customer detail page only books a single hour per slot (no range select); admin schedule editing is functional but minimal.
 - The `payments` table is new — reload `schema.sql` (+`seed.sql`) into the dev `padelkuy` DB before a demo so it exists. `tests/bootstrap.php` rebuilds the test DB from `schema.sql` automatically.

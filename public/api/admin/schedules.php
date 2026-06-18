@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../../../config/db.php';
 require_once __DIR__ . '/../../../lib/http.php';
 require_once __DIR__ . '/../../../lib/auth.php';
+require_once __DIR__ . '/../../../lib/ownership.php';
 require_once __DIR__ . '/../../../lib/session.php';
 require_once __DIR__ . '/../../../lib/schedules.php';
 
@@ -20,6 +21,7 @@ try {
                 send_error('court_id is required', 422);
                 return;
             }
+            require_court_owner(db(), $courtId);
             send_json(listSchedules(db(), $courtId));
             return;
 
@@ -28,6 +30,7 @@ try {
                 send_error('court_id is required', 422);
                 return;
             }
+            require_court_owner(db(), $courtId);
             $rows = read_body()['schedules'] ?? [];
             setSchedules(db(), $courtId, is_array($rows) ? $rows : []);
             send_json(listSchedules(db(), $courtId));

@@ -9,12 +9,12 @@ require_once __DIR__ . '/schedules.php';
 // Create ($id === null) or update a venue and replace all of its nested data
 // from $bundle. Returns the saved venue (getVenue shape) with a nested
 // `courts` array, each court carrying its `schedules`.
-function saveVenueBundle(PDO $pdo, ?int $id, array $bundle): array
+function saveVenueBundle(PDO $pdo, ?int $id, array $bundle, ?int $owner_id = null): array
 {
     $pdo->beginTransaction();
     try {
         if ($id === null) {
-            $id = createVenue($pdo, $bundle);
+            $id = createVenue($pdo, $bundle, $owner_id);
         } elseif (!updateVenue($pdo, $id, $bundle)) {
             throw new InvalidArgumentException('Venue not found');
         }

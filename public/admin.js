@@ -32,33 +32,23 @@ document.addEventListener('DOMContentLoaded', () => {
             images: { thumbnail: '', main: '', detail0: '', detail1: '' }, facilities: [] };
     }
 
-    // --- Venue list + selector --------------------------------------------
-    const venueSelect = document.getElementById('venue-select');
-
-    async function loadVenueList(selectId) {
+    // --- My venue (one admin owns exactly one venue, ADR-0006) ------------
+    // The admin endpoint already scopes to the caller's venue, so the list is
+    // 0 or 1 entries. No selector — load "my venue", or a blank form to create
+    // one if the admin somehow has none (e.g. after deleting it).
+    async function loadMyVenue() {
         const res = await fetch('/api/admin/venues.php', { credentials: 'include' });
         const list = res.ok ? await res.json() : [];
-        venueSelect.innerHTML = list.map(v =>
-            `<option value="${v.id}">${v.name} — ${v.city}</option>`).join('');
         if (list.length) {
-            venueSelect.value = String(selectId || list[0].id);
-            await loadVenue(Number(venueSelect.value));
+            await loadVenue(list[0].id);
         } else {
-            newVenue();
+            state = blankVenue();
+            courts = [];
+            paintVenue();
+            renderFacilities();
+            renderCourts();
+            msg('Belum ada venue — isi field lalu Simpan untuk membuatnya.');
         }
-    }
-
-    venueSelect.addEventListener('change', () => loadVenue(Number(venueSelect.value)));
-    document.getElementById('btn-new-venue').addEventListener('click', newVenue);
-
-    function newVenue() {
-        state = blankVenue();
-        courts = [];
-        venueSelect.value = '';
-        paintVenue();
-        renderFacilities();
-        renderCourts();
-        msg('Venue baru — isi field lalu Simpan.');
     }
 
     async function loadVenue(id) {
@@ -258,9 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(bundle),
             });
             if (res.ok) {
-                const saved = await res.json();
+                await res.json();
                 msg('Tersimpan.');
-                await loadVenueList(saved.id);
+                await loadMyVenue();
             } else {
                 const err = await res.json().catch(() => ({}));
                 msg('Gagal menyimpan: ' + (err.error || res.status), false);
@@ -292,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td><strong>${b.code || b.id}</strong></td>
                 <td>${b.user_name || '-'}</td>
-                <td>${b.venue_name} - ${b.court_label}</td>
+                <td>${b.court_label}</td>
                 <td>${badge(b.status)}</td>
                 <td>${(b.status === 'pending' || b.status === 'paid')
                     ? `<button class="btn-cancel" data-id="${b.id}" type="button">Batalkan</button>` : '-'}</td>
@@ -317,6 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Init --------------------------------------------------------------
-    loadVenueList();
+    loadMyVenue();
     loadBookings();
 });
