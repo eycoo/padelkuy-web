@@ -19,7 +19,10 @@ SELECT v.id, f.name
 FROM venues v
 CROSS JOIN (SELECT 'Shower' AS name UNION ALL SELECT 'Parking' UNION ALL SELECT 'Cafe') f;
 
--- A seed admin account so the admin panel is reachable after a fresh load.
--- Login: admin@padelkuy.test / admin123  (change the password in production).
+-- Seed accounts so both panels are reachable after a fresh load (change the
+-- passwords in production):
+--   admin@padelkuy.test / admin123  (admin)
+--   user@padelkuy.test  / user123   (customer, for the demo)
 INSERT INTO users (name, email, password_hash, role) VALUES
-  ('Admin', 'admin@padelkuy.test', '$2y$10$1ZrA0A2looh9pT13XPD6a.fTpZqJ9v/oDDcYAHK1yGERATNOS/B76', 'admin');
+  ('Admin', 'admin@padelkuy.test', '$2y$10$1ZrA0A2looh9pT13XPD6a.fTpZqJ9v/oDDcYAHK1yGERATNOS/B76', 'admin'),
+  ('Demo User', 'user@padelkuy.test', '$2y$10$rrY6uRPmTl9aIU89zF9LdOKhA.CwYBX/lNsx.bLHHucpOK6XTtriC', 'user');
