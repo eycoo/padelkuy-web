@@ -23,8 +23,58 @@ court type, per-court schedules (day-band hours + pricing, driving availability
 with a flat-grid fallback), admin booking status filter + pagination, a
 transactional bulk venue save, and an image-upload endpoint.
 
+**The frontend is now wired end-to-end (2026-06-18 session).** The customer detail
+page (`public/detail.js`) loads real venues + availability and creates a booking via
+`POST /api/bookings.php`, then redirects to `pembayaran.html?booking_id=<id>` (it was
+previously mock and navigated with no id → "ID pesanan tidak ditemukan"). The admin
+page (`public/admin.html` + `admin.js`) was entirely mock (`alert()` placeholders) and
+is now a working editor: venue selector, real image upload (`admin/upload.php`),
+add/remove facility chips, court + schedule editing, save via `admin/venue_save.php`,
+and a live bookings table with status tabs + cancel. A demo customer account was
+seeded: `user@padelkuy.test` / `user123`.
+
 - **Stack:** native PHP + MySQL, no fullstack framework, no Node/TypeScript (course constraint). Backend is a JSON API; frontend is plain HTML/CSS/JS calling it with `fetch()`. See `docs/adr/0002-...`.
 - **Default branch is `master`** (the real history). `main` is an unrelated 2-commit stub — ignore it.
+
+## ⏭️ NEXT TASK (planned): Point C — per-venue admin / owner model
+
+The user wants to change the admin model from **one global admin** to **one admin per
+venue** (1 admin owns 1 venue; a venue still has many courts). They will start this in
+a fresh context — this section is the brief.
+
+**⚠️ This CONTRADICTS the current domain.** `CONTEXT.md` defines Admin as "a single
+global role… there is no per-venue owner" (and explicitly _Avoids_ "owner/venue
+owner/partner"). ADR-0002+ assume a global admin. So step 0 is to **revise the domain,
+not just the code**:
+
+1. **Domain first:** rewrite the `Admin` entry in `CONTEXT.md` (or add an `Owner`
+   actor) and write a **new ADR** (`docs/adr/0006-per-venue-admin.md`) that supersedes
+   the global-admin stance and records why.
+2. **Schema (additive — see migration rules below):** add ownership. Recommended:
+   `venues.owner_id INT NULL REFERENCES users(id)`. Mirror into `schema.sql` +
+   `schema.railway.sql`; migrate the live DB additively.
+3. **Backend scoping** (the core work): a helper like `ownedVenueId(pdo, user_id)` and
+   an authorize-this-is-mine guard (403 otherwise). Then scope every admin endpoint to
+   the caller's venue:
+   - `admin/venues.php` — list/GET only own venue; POST sets `owner_id = me` and blocks
+     a second venue; PUT/DELETE only if owner.
+   - `admin/venue_save.php` — POST sets owner; PUT only own venue.
+   - `admin/courts.php` / `schedules.php` / `upload.php` — verify the court/venue is the
+     caller's.
+   - `admin/bookings.php` — filter to bookings whose court→venue is owned by the caller
+     (today it lists **all** venues — this is the multi-venue list the user noticed).
+4. **Admin registration:** `public/registerai-admin.html` + the `register-admin-form`
+   handler in `auth.js` is currently **fake** (a `setTimeout`, no API call). Wire it to
+   really create an admin user + their venue and set `owner_id`.
+5. **Frontend:** drop the venue selector in `admin.js` (an admin has exactly one venue);
+   load "my venue"; bookings table no longer needs the venue dropdown.
+6. **Tests:** existing admin tests assume a global admin and will need an owner set up;
+   add ownership/authorization tests (an admin cannot touch another admin's venue).
+7. **Seed:** give the seed admin an owned venue.
+
+(If the user later only wants a *focused view* without changing the model, the cheaper
+"Point B" is FE-only: filter the bookings table by `admin/bookings.php?venue_id=N` —
+the endpoint already supports it.)
 
 ## Repo layout
 
@@ -35,7 +85,7 @@ public/            web root (serve this dir)
 lib/               domain logic — http, session, auth, venues, venue_save, courts,
                    schedules, availability, bookings, payments, receipt, uploads
 config/db.php      PDO connection (env-overridable)
-tests/             PHPUnit (113 tests, all green)
+tests/             PHPUnit (114 tests, all green)
 schema.sql seed.sql              (+ schema.railway.sql / seed.railway.sql for managed hosts)
 CONTEXT.md         domain glossary (Customer / Admin / Venue / Court / Slot / Booking / Booking code / Payment / Refund)
 docs/adr/          0001 derive-availability, 0002 json-api, 0003 booking-payment-lifecycle,
@@ -107,7 +157,7 @@ Frontend must send `Content-Type: application/json` and include credentials so t
 - **ADR-0001:** availability is *derived* from bookings, no `slots` table. Operating hours fixed 07:00–20:00 (bookable start hours 7..20). A booking is a contiguous range `[start_hour, end_hour)` (end exclusive); conflicts caught by an overlap check in a transaction.
 - **ADR-0002:** JSON API + `public/` web root (not server-rendered) so backend/frontend split cleanly by role.
 - **ADR-0003:** booking payment lifecycle. A booking starts `pending` and **holds its slots**; availability and the overlap check count only `pending`/`paid` bookings, so `expired`/`cancelled` free their slots. Unpaid `pending` bookings are swept to `expired` 15 minutes after creation (lazy, on read — no cron). Payment is **simulated** (a `payments` row, `paid`/`refunded`). A customer may self-cancel a `paid` booking within **5 minutes** of paying (refund); after that it is locked and only an admin can cancel (admin cancel always refunds a paid booking). Cancellation is a **soft** status change — rows persist. `createBooking` also rejects past dates.
-- **ADR-0005:** court **schedules** drive bookable hours + per-hour price (day bands `everyday`/`mon_fri`/`sat_sun`, specific band beats everyday), with a **fallback**: a court with no schedules keeps the fixed 07:00–20:00 grid + flat venue price (so legacy/seed courts and the whole pre-existing suite are unaffected). Booking price stays derived (sum of per-hour rates). Venue detail extras (About, facilities, gallery, court type) are additive columns/child tables; `saveVenueBundle` writes the whole editor in one transaction.
+- **ADR-0005:** court **schedules** drive bookable hours + per-hour price (day bands `everyday`/`mon_fri`/`sat_sun`, specific band beats everyday), with a **fallback**: a court with no schedules keeps the fixed 07:00–20:00 grid + flat venue price (so legacy/seed courts and the whole pre-existing suite are unaffected). Booking price stays derived (sum of per-hour rates), and the booking quote and the payment amount now go through a single `priceForRange` (`lib/availability.php`) so they cannot drift — an earlier bug charged the flat venue rate while quoting the schedule sum (fixed 2026-06-18, commits `e576a1d`/`362c21b`). Venue detail extras (About, facilities, gallery, court type) are additive columns/child tables; `saveVenueBundle` writes the whole editor in one transaction.
 - **Glossary (`CONTEXT.md`):** Venue = the place; Court = A/B/C inside it; Slot = one bookable hour; Booking = a user's reservation over a range. Use these words in code/UI.
 
 ## Frontend work (Royan) — issues #14–#18
@@ -171,7 +221,12 @@ All BE blockers are merged; these can start whenever Royan picks them up.
 
 ## Open / loose ends
 
-- All backend is merged to `master` and **deployed live** — including the admin-editor BE (#43–#51: venue detail, court schedules, bookings paging, bulk save, upload). The Railway DB has been migrated additively for ADR-0005 (no data loss). The only open work is frontend (Royan): customer #14–#18, admin #24–#26, payment lifecycle #33–#35.
+- All backend is merged to `master` and **deployed live** — including the admin-editor BE (#43–#51: venue detail, court schedules, bookings paging, bulk save, upload). The Railway DB has been migrated additively for ADR-0005 (no data loss).
+- **Frontend is wired** (2026-06-18): customer homepage/detail/booking/payment/riwayat and the admin editor all call the API (see "Where things stand"). Brought forward from the `frontend` branch file-by-file — that branch predates the ADR-0005 backend, so a full merge would have reverted `lib/`/`tests/`/`schema*`; only `public/` files were taken. `detail.js`/`admin.js`/`admin.html` were then rewritten to wire the real endpoints. The `frontend` branch is now stale vs `master`.
+- This session's commits on `master`: `e576a1d`/`362c21b` (payment price fix + `priceForRange`), `d7b72f7` (FE refresh from `frontend`), `c95fbf4` (seed demo user), `771b49f` (detail page wired), `c64dde0` (admin editor wired). The live Railway DB also had the demo user inserted via a one-off PDO script (its seed was loaded before that account existed).
+- **Demo accounts:** admin `admin@padelkuy.test`/`admin123`, customer `user@padelkuy.test`/`user123` (both in `seed.sql`/`seed.railway.sql`).
+- New docs: `docs/demo-backend.md` (backend demo guide) and `docs/presentation-brief.md` (brief for generating slides). Not yet committed at time of writing — commit if keeping.
+- Remaining FE polish (not blockers): the customer detail page only books a single hour per slot (no range select); admin schedule editing is functional but minimal.
 - The `payments` table is new — reload `schema.sql` (+`seed.sql`) into the dev `padelkuy` DB before a demo so it exists. `tests/bootstrap.php` rebuilds the test DB from `schema.sql` automatically.
 - Regenerate the ERD after any schema change: `npx -y -p @mermaid-js/mermaid-cli mmdc -i docs/erd.mmd -o docs/erd.png -b white --scale 3` (run via `cmd //c` — the bash `npx` is intercepted in this environment).
 - Parent PRDs #1 (customer) and #19 (admin) stay open until their frontends land.
