@@ -1,162 +1,322 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    
-    // Auth Check
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const userName = localStorage.getItem('userName') || 'Admin';
-    const userRole = localStorage.getItem('userRole'); 
-    const venueName = localStorage.getItem('adminVenueName') || '';
-
-    // if (!isLoggedIn || userRole !== 'admin') {
-    //     alert("Akses Ditolak. Anda harus login sebagai Admin.");
-    //     window.location.href = 'login.html';
-    //     return;
-    // }
-
-    document.getElementById('admin-name').innerText = userName;
-    if (venueName) {
-        document.getElementById('venue-name').value = venueName;
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Auth gate ---------------------------------------------------------
+    if (localStorage.getItem('isLoggedIn') !== 'true' || localStorage.getItem('userRole') !== 'admin') {
+        alert('Akses ditolak. Login sebagai admin dulu.');
+        window.location.href = 'login.html';
+        return;
     }
+    document.getElementById('admin-name').innerText = localStorage.getItem('userName') || 'Admin';
 
-    // Logout Action
     document.getElementById('btn-admin-logout').addEventListener('click', async () => {
-        try {
-            await fetch('/api/logout.php', { method: 'POST', credentials: 'include' });
-        } catch(e) {}
+        try { await fetch('/api/logout.php', { method: 'POST', credentials: 'include' }); } catch (e) {}
         localStorage.clear();
         window.location.href = 'login.html';
     });
 
-    // Input dinamis untuk chips fasilitas
-    const facilityInput = document.getElementById('facility-input');
-    const facilityChips = document.getElementById('facility-chips');
+    // --- Mappings between FE labels and stored enums -----------------------
+    const BAND_TO_FE = { everyday: 'EVERYDAY', mon_fri: 'MON-FRI', sat_sun: 'SAT-SUN' };
+    const hhmm = (h) => String(h).padStart(2, '0') + ':00';
+    const msg = (text, ok = true) => {
+        const el = document.getElementById('admin-msg');
+        el.innerText = text;
+        el.style.color = ok ? '#1a7f37' : '#c0392b';
+    };
 
-    if (facilityInput) {
-        facilityInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && facilityInput.value.trim() !== '') {
-                const val = facilityInput.value.trim();
-                const span = document.createElement('span');
-                span.className = 'chip';
-                span.innerHTML = `${val} <button class="btn-remove-chip" onclick="this.parentElement.remove()">x</button>`;
-                facilityChips.appendChild(span);
-                facilityInput.value = '';
+    // --- Editor state ------------------------------------------------------
+    // images: thumbnail -> image_path, main -> main_image_path, detail0/1 -> gallery
+    let state = blankVenue();
+    let courts = [];
+
+    function blankVenue() {
+        return { id: null, name: '', city: '', price: 0, tag: '', description: '',
+            images: { thumbnail: '', main: '', detail0: '', detail1: '' }, facilities: [] };
+    }
+
+    // --- Venue list + selector --------------------------------------------
+    const venueSelect = document.getElementById('venue-select');
+
+    async function loadVenueList(selectId) {
+        const res = await fetch('/api/admin/venues.php', { credentials: 'include' });
+        const list = res.ok ? await res.json() : [];
+        venueSelect.innerHTML = list.map(v =>
+            `<option value="${v.id}">${v.name} — ${v.city}</option>`).join('');
+        if (list.length) {
+            venueSelect.value = String(selectId || list[0].id);
+            await loadVenue(Number(venueSelect.value));
+        } else {
+            newVenue();
+        }
+    }
+
+    venueSelect.addEventListener('change', () => loadVenue(Number(venueSelect.value)));
+    document.getElementById('btn-new-venue').addEventListener('click', newVenue);
+
+    function newVenue() {
+        state = blankVenue();
+        courts = [];
+        venueSelect.value = '';
+        paintVenue();
+        renderFacilities();
+        renderCourts();
+        msg('Venue baru — isi field lalu Simpan.');
+    }
+
+    async function loadVenue(id) {
+        const res = await fetch(`/api/admin/venues.php?id=${id}`, { credentials: 'include' });
+        if (!res.ok) { msg('Gagal memuat venue.', false); return; }
+        const v = await res.json();
+        const gallery = v.images || [];
+        state = {
+            id: v.id, name: v.name || '', city: v.city || '', price: v.price_per_hour || 0,
+            tag: v.tag || '', description: v.description || '',
+            images: {
+                thumbnail: v.image_path || '', main: v.main_image_path || '',
+                detail0: gallery[0] || '', detail1: gallery[1] || '',
+            },
+            facilities: (v.facilities || []).slice(),
+        };
+        // courts + schedules
+        const cRes = await fetch(`/api/admin/courts.php?venue_id=${id}`, { credentials: 'include' });
+        const rawCourts = cRes.ok ? await cRes.json() : [];
+        courts = [];
+        for (const c of rawCourts) {
+            const sRes = await fetch(`/api/admin/schedules.php?court_id=${c.id}`, { credentials: 'include' });
+            const sched = sRes.ok ? await sRes.json() : [];
+            courts.push({
+                id: c.id, name: c.label, type: c.type === 'outdoor' ? 'Outdoor' : 'Indoor',
+                schedules: sched.map(s => ({ day: BAND_TO_FE[s.day_band] || 'EVERYDAY',
+                    start: hhmm(s.start_hour), end: hhmm(s.end_hour), price: s.price })),
+            });
+        }
+        paintVenue();
+        renderFacilities();
+        renderCourts();
+        msg(`Memuat "${state.name}".`);
+    }
+
+    // --- Paint venue scalar fields ----------------------------------------
+    function paintVenue() {
+        document.getElementById('venue-name-text').innerText = state.name;
+        document.getElementById('venue-location-text').innerText = state.city;
+        document.getElementById('venue-price').value = state.price || '';
+        document.getElementById('venue-tag-text').innerText = state.tag;
+        document.getElementById('venue-about-text').innerText = state.description;
+        document.querySelectorAll('.image-slot').forEach(slot => paintSlot(slot));
+    }
+
+    function paintSlot(slot) {
+        const role = slot.dataset.role;
+        const path = state.images[role];
+        const input = slot.querySelector('input');
+        if (path) {
+            slot.style.backgroundImage = `url('${path}')`;
+            slot.style.backgroundSize = 'cover';
+            slot.style.backgroundPosition = 'center';
+            slot.style.color = 'transparent';
+        } else {
+            slot.style.backgroundImage = '';
+            slot.style.color = '';
+        }
+        if (input) input.value = '';
+    }
+
+    // --- Image upload ------------------------------------------------------
+    document.querySelectorAll('.image-slot input[type=file]').forEach(input => {
+        input.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const slot = input.closest('.image-slot');
+            const role = slot.dataset.role;
+            const prev = slot.textContent;
+            slot.textContent = 'Mengupload...';
+            try {
+                const fd = new FormData();
+                fd.append('image', file);
+                const res = await fetch('/api/admin/upload.php', { method: 'POST', body: fd, credentials: 'include' });
+                if (res.status === 201) {
+                    const { path } = await res.json();
+                    state.images[role] = path;
+                    paintSlot(slot);
+                    msg('Gambar terupload. Jangan lupa Simpan.');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    slot.textContent = prev;
+                    msg('Upload gagal: ' + (err.error || res.status), false);
+                }
+            } catch (err) {
+                slot.textContent = prev;
+                msg('Upload gagal: koneksi.', false);
             }
         });
+    });
+
+    // --- Facilities --------------------------------------------------------
+    const facilityContainer = document.getElementById('facility-container');
+    const facilityInput = document.getElementById('facility-input');
+
+    function renderFacilities() {
+        facilityContainer.innerHTML = state.facilities.map((f, i) => `
+            <span class="chip facility-item">${f}
+                <button class="btn-remove-chip" data-i="${i}" type="button">x</button>
+            </span>`).join('');
     }
 
-    // Manajemen data lapangan dan jadwal
-    const courtsWrapper = document.getElementById('courts-wrapper');
-    const btnAddCourt = document.getElementById('btn-add-court');
-
-    // Data statis awal
-    let courtsData = [
-        {
-            id: 1, 
-            name: 'Lapangan 1', 
-            type: 'Indoor',
-            schedules: [
-                { day: 'EVERYDAY', start: '07:00', end: '08:00', price: 150000 },
-                { day: 'SAT-SUN', start: '15:00', end: '16:00', price: 150000 }
-            ]
+    facilityContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-remove-chip')) {
+            state.facilities.splice(Number(e.target.dataset.i), 1);
+            renderFacilities();
         }
-    ];
+    });
 
-function renderCourts() {
-    if (!courtsWrapper) return;
-    courtsWrapper.innerHTML = courtsData.map((c, i) => `
-        <div class="admin-court-card">
-            <button class="btn-delete-court" onclick="removeCourt(${i})">Hapus Lapangan</button>
-            
-            <div class="court-header">
-                <div class="editable-text court-name-edit" contenteditable="true" onblur="updateCourt(${i}, 'name', this.innerText)">${c.name}</div>
-                <div class="editable-text court-desc-edit" contenteditable="true" onblur="updateCourt(${i}, 'type', this.innerText)">${c.type}</div>
-            </div>
+    facilityInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = facilityInput.value.trim();
+            if (val && !state.facilities.includes(val)) {
+                state.facilities.push(val);
+                renderFacilities();
+            }
+            facilityInput.value = '';
+        }
+    });
 
-            <div class="schedule-capsule-container">
-                ${c.schedules.map((s, j) => `
-                    <div class="schedule-pill">
-                        <select class="pill-input" onchange="updateSchedule(${i}, ${j}, 'day', this.value)" style="width: 120px;">
-                            <option value="EVERYDAY" ${s.day === 'EVERYDAY' ? 'selected' : ''}>EVERYDAY</option>
-                            <option value="MON-FRI" ${s.day === 'MON-FRI' ? 'selected' : ''}>MON-FRI</option>
-                            <option value="SAT-SUN" ${s.day === 'SAT-SUN' ? 'selected' : ''}>SAT-SUN</option>
-                        </select>
-                        <input type="time" class="pill-input" value="${s.start}" onchange="updateSchedule(${i}, ${j}, 'start', this.value)" style="width: 65px;">
-                        <input type="time" class="pill-input" value="${s.end}" onchange="updateSchedule(${i}, ${j}, 'end', this.value)" style="width: 65px;">
-                        <input type="number" class="pill-input" value="${s.price}" placeholder="Harga" oninput="updateSchedule(${i}, ${j}, 'price', this.value)" style="width: 70px;">
-                        <button class="btn-x" onclick="removeSchedule(${i}, ${j})">x</button>
-                    </div>
-                `).join('')}
-                
-                <button class="btn-add-schedule" onclick="addSchedule(${i})">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
+    // --- Courts + schedules (local edit) ----------------------------------
+    const courtsWrapper = document.getElementById('courts-wrapper');
 
-    // Fungsi global agar bisa dipanggil lewat onclick HTML
-    window.updateCourt = (index, key, value) => { courtsData[index][key] = value; };
-    window.removeCourt = (index) => { courtsData.splice(index, 1); renderCourts(); };
-    window.removeSchedule = (courtIdx, schedIdx) => { courtsData[courtIdx].schedules.splice(schedIdx, 1); renderCourts(); };
-    window.addSchedule = (courtIdx) => { 
-        courtsData[courtIdx].schedules.push({day: 'EVERYDAY', start: '00:00', end: '00:00', price: 0}); 
-        renderCourts(); 
-    };
-
-    if (btnAddCourt) {
-        btnAddCourt.addEventListener('click', () => {
-            courtsData.push({ id: Date.now(), name: 'Lapangan Baru', type: 'Indoor', schedules: [] });
-            renderCourts();
-        });
+    function renderCourts() {
+        courtsWrapper.innerHTML = courts.map((c, i) => `
+            <div class="admin-court-card">
+                <button class="btn-delete-court" onclick="removeCourt(${i})" type="button">Hapus Lapangan</button>
+                <div class="court-header">
+                    <div class="editable-text court-name-edit" contenteditable="true" onblur="updateCourt(${i}, 'name', this.innerText)">${c.name}</div>
+                    <div class="editable-text court-desc-edit" contenteditable="true" onblur="updateCourt(${i}, 'type', this.innerText)">${c.type}</div>
+                </div>
+                <div class="schedule-capsule-container">
+                    ${c.schedules.map((s, j) => `
+                        <div class="schedule-pill">
+                            <select class="pill-input" onchange="updateSchedule(${i}, ${j}, 'day', this.value)" style="width: 120px;">
+                                <option value="EVERYDAY" ${s.day === 'EVERYDAY' ? 'selected' : ''}>EVERYDAY</option>
+                                <option value="MON-FRI" ${s.day === 'MON-FRI' ? 'selected' : ''}>MON-FRI</option>
+                                <option value="SAT-SUN" ${s.day === 'SAT-SUN' ? 'selected' : ''}>SAT-SUN</option>
+                            </select>
+                            <input type="time" class="pill-input" value="${s.start}" onchange="updateSchedule(${i}, ${j}, 'start', this.value)" style="width: 65px;">
+                            <input type="time" class="pill-input" value="${s.end}" onchange="updateSchedule(${i}, ${j}, 'end', this.value)" style="width: 65px;">
+                            <input type="number" class="pill-input" value="${s.price}" placeholder="Harga" oninput="updateSchedule(${i}, ${j}, 'price', this.value)" style="width: 80px;">
+                            <button class="btn-x" onclick="removeSchedule(${i}, ${j})" type="button">x</button>
+                        </div>`).join('')}
+                    <button class="btn-add-schedule" onclick="addSchedule(${i})" type="button">+ Jadwal</button>
+                </div>
+            </div>`).join('');
     }
-    window.updateSchedule = (courtIdx, schedIdx, key, value) => { courtsData[courtIdx].schedules[schedIdx][key] = value; };
 
-    renderCourts();
+    window.updateCourt = (i, k, v) => { courts[i][k] = v.trim(); };
+    window.removeCourt = (i) => { courts.splice(i, 1); renderCourts(); };
+    window.removeSchedule = (i, j) => { courts[i].schedules.splice(j, 1); renderCourts(); };
+    window.addSchedule = (i) => { courts[i].schedules.push({ day: 'EVERYDAY', start: '07:00', end: '08:00', price: state.price || 100000 }); renderCourts(); };
+    window.updateSchedule = (i, j, k, v) => { courts[i].schedules[j][k] = (k === 'price') ? Number(v) : v; };
 
-    // Mock Bookings Table
+    document.getElementById('btn-add-court').addEventListener('click', () => {
+        courts.push({ id: null, name: 'Lapangan Baru', type: 'Indoor', schedules: [] });
+        renderCourts();
+    });
+
+    // --- Save (bulk bundle) ------------------------------------------------
+    document.getElementById('btn-save-venue').addEventListener('click', async () => {
+        // read scalar fields from DOM
+        state.name = document.getElementById('venue-name-text').innerText.trim();
+        state.city = document.getElementById('venue-location-text').innerText.trim();
+        state.price = Number(document.getElementById('venue-price').value);
+        state.tag = document.getElementById('venue-tag-text').innerText.trim();
+        state.description = document.getElementById('venue-about-text').innerText.trim();
+
+        if (!state.name || !state.city) { msg('Nama dan kota wajib diisi.', false); return; }
+        if (!(state.price > 0)) { msg('Harga per jam harus > 0.', false); return; }
+
+        const gallery = [state.images.detail0, state.images.detail1].filter(Boolean);
+        const bundle = {
+            name: state.name, city: state.city, price_per_hour: state.price,
+            tag: state.tag || null, description: state.description || null,
+            image_path: state.images.thumbnail || null,
+            main_image_path: state.images.main || null,
+            facilities: state.facilities,
+            images: gallery,
+            courts: courts.map(c => ({
+                ...(typeof c.id === 'number' ? { id: c.id } : {}),
+                label: c.name, type: (c.type || 'Indoor').toLowerCase(),
+                schedules: c.schedules.map(s => ({ day: s.day, start: s.start, end: s.end, price: Number(s.price) })),
+            })),
+        };
+
+        const url = state.id ? `/api/admin/venue_save.php?id=${state.id}` : '/api/admin/venue_save.php';
+        const method = state.id ? 'PUT' : 'POST';
+        const btn = document.getElementById('btn-save-venue');
+        btn.disabled = true; btn.innerText = 'Menyimpan...';
+        try {
+            const res = await fetch(url, {
+                method, credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bundle),
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                msg('Tersimpan.');
+                await loadVenueList(saved.id);
+            } else {
+                const err = await res.json().catch(() => ({}));
+                msg('Gagal menyimpan: ' + (err.error || res.status), false);
+            }
+        } catch (err) {
+            msg('Gagal menyimpan: koneksi.', false);
+        }
+        btn.disabled = false; btn.innerText = 'Simpan Perubahan Venue';
+    });
+
+    // --- Bookings table ----------------------------------------------------
     const tableBody = document.getElementById('admin-bookings-table');
-    const mockBookings = [
-        { id: "PK-98273", name: "Andi S.", court: "Lapangan 1", status: "paid" },
-        { id: "PK-98274", name: "Dwi", court: "Lapangan 1", status: "paid" },
-        { id: "PK-98275", name: "Andi S.", court: "Lapangan 1", status: "pending" },
-        { id: "PK-98276", name: "Budi", court: "Lapangan 2", status: "pending" }
-    ];
+    let bookingFilter = 'all';
 
-    const renderTable = (filterStatus = 'all') => {
-        const filtered = mockBookings.filter(b => {
-            if (filterStatus === 'all') return true;
-            if (filterStatus === 'completed') return b.status === 'paid';
-            return b.status === filterStatus;
-        });
+    async function loadBookings() {
+        const q = bookingFilter === 'all' ? '' : `?status=${bookingFilter}`;
+        const res = await fetch(`/api/admin/bookings.php${q}`, { credentials: 'include' });
+        const rows = res.ok ? await res.json() : [];
+        if (!rows.length) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;">Tidak ada pesanan.</td></tr>`;
+            return;
+        }
+        const badge = (s) => {
+            if (s === 'paid') return '<span class="badge badge-success">LUNAS</span>';
+            if (s === 'pending') return '<span class="badge badge-pending">PENDING</span>';
+            return `<span class="badge badge-danger">${s.toUpperCase()}</span>`;
+        };
+        tableBody.innerHTML = rows.map(b => `
+            <tr>
+                <td><strong>${b.code || b.id}</strong></td>
+                <td>${b.user_name || '-'}</td>
+                <td>${b.venue_name} - ${b.court_label}</td>
+                <td>${badge(b.status)}</td>
+                <td>${(b.status === 'pending' || b.status === 'paid')
+                    ? `<button class="btn-cancel" data-id="${b.id}" type="button">Batalkan</button>` : '-'}</td>
+            </tr>`).join('');
+    }
 
-        tableBody.innerHTML = filtered.map(b => {
-            let badgeHtml = b.status === 'paid' 
-                ? `<span class="badge badge-success">LUNAS</span>`
-                : `<span class="badge badge-pending">PENDING</span>`;
+    tableBody.addEventListener('click', async (e) => {
+        if (!e.target.classList.contains('btn-cancel')) return;
+        if (!confirm('Batalkan pesanan ini? Jika sudah dibayar akan direfund.')) return;
+        const id = e.target.dataset.id;
+        const res = await fetch(`/api/admin/bookings.php?id=${id}`, { method: 'DELETE', credentials: 'include' });
+        if (res.ok) loadBookings(); else alert('Gagal membatalkan.');
+    });
 
-            return `
-                <tr>
-                    <td><strong>#${b.id}</strong></td>
-                    <td>${b.name}</td>
-                    <td>${b.court}</td>
-                    <td>${badgeHtml}</td>
-                    <td>
-                        <button class="btn-cancel" onclick="alert('Batalkan pesanan ${b.id}?')">Batalkan</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    };
-
-    renderTable();
-
-    // Tab Filter Logic
-    const tabBtns = document.querySelectorAll('.admin-bookings-section .tab-btn');
-    tabBtns.forEach(btn => {
+    document.querySelectorAll('.admin-bookings-section .tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            tabBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-bookings-section .tab-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            renderTable(e.target.getAttribute('data-filter'));
+            bookingFilter = e.target.getAttribute('data-filter');
+            loadBookings();
         });
     });
+
+    // --- Init --------------------------------------------------------------
+    loadVenueList();
+    loadBookings();
 });

@@ -17,63 +17,77 @@
   </nav>
 
   <main class="admin-dashboard">
-    
+
     <section class="admin-panel admin-venue-section">
-      <div class="inline-edit-group" style="margin-bottom: 24px;">
-        <label class="section-label">Nama Venue</label>
-        <div id="venue-name-text" class="editable-text" contenteditable="true" style="font-size: 24px; font-weight: bold;">NAMA VENUE</div>
+
+      <div class="inline-edit-group" style="margin-bottom: 24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <select id="venue-select" class="pill-input" style="min-width:240px; padding:8px;"></select>
+        <button id="btn-new-venue" class="btn btn-ghost">+ Venue Baru</button>
       </div>
 
       <div class="inline-edit-group" style="margin-bottom: 24px;">
-        <label class="section-label">Location</label>
-        <div id="venue-location-text" class="editable-text" contenteditable="true">Jl. Surabaya</div>
+        <label class="section-label">Nama Venue</label>
+        <div id="venue-name-text" class="editable-text" contenteditable="true" style="font-size: 24px; font-weight: bold;"></div>
       </div>
-  
+
+      <div class="inline-edit-group" style="margin-bottom: 24px;">
+        <label class="section-label">Kota / Location</label>
+        <div id="venue-location-text" class="editable-text" contenteditable="true"></div>
+      </div>
+
+      <div class="inline-edit-group" style="margin-bottom: 24px;">
+        <label class="section-label">Harga per Jam (Rp)</label>
+        <input id="venue-price" type="number" min="0" step="1000" class="pill-input" style="width:200px; padding:8px;">
+      </div>
+
+      <div class="inline-edit-group" style="margin-bottom: 24px;">
+        <label class="section-label">Tag (opsional)</label>
+        <div id="venue-tag-text" class="editable-text" contenteditable="true"></div>
+      </div>
+
       <div class="inline-edit-group">
         <label class="section-label">About</label>
-        <div id="venue-about-text" class="editable-text" contenteditable="true">Lorem ipsum dolor sit amet...</div>
+        <div id="venue-about-text" class="editable-text" contenteditable="true"></div>
       </div>
-  
+
       <div class="inline-edit-group" style="margin-top: 32px; margin-bottom: 24px;">
         <label class="section-label">Image Information</label>
         <div class="image-grid">
-          <div class="image-slot" onclick="alert('Buka dialog upload Thumbnail')">Upload Thumbnail</div>
-          <div class="image-slot" onclick="alert('Buka dialog upload Main Image')">Upload Main Image</div>
-          <div class="image-slot" onclick="alert('Buka dialog upload Detail Image 1')">Upload Detail Image 1</div>
-          <div class="image-slot" onclick="alert('Buka dialog upload Detail Image 2')">Upload Detail Image 2</div>
+          <label class="image-slot" data-role="thumbnail">Upload Thumbnail<input type="file" accept="image/jpeg,image/png,image/webp" hidden></label>
+          <label class="image-slot" data-role="main">Upload Main Image<input type="file" accept="image/jpeg,image/png,image/webp" hidden></label>
+          <label class="image-slot" data-role="detail0">Upload Detail Image 1<input type="file" accept="image/jpeg,image/png,image/webp" hidden></label>
+          <label class="image-slot" data-role="detail1">Upload Detail Image 2<input type="file" accept="image/jpeg,image/png,image/webp" hidden></label>
         </div>
       </div>
-  
+
       <div class="inline-edit-group group-spaced">
         <label class="section-label">Facility</label>
-        <div class="facility-grid" id="facility-container">
-          <div class="editable-text facility-item" contenteditable="true">Shower</div>
-          
-          <button class="dashed-add-btn" id="btn-add-facility" onclick="alert('Fungsi tambah fasilitas di JS menyusul')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#183988" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-          </button>
+        <div class="facility-grid" id="facility-container"></div>
+        <div style="margin-top: 12px;">
+          <input id="facility-input" class="pill-input" placeholder="Ketik fasilitas lalu Enter" style="padding:8px; width:260px;">
         </div>
       </div>
-  
+
       <label class="section-label court-list-margin">Daftar Lapangan</label>
       <div id="courts-wrapper"></div>
-        </div>
       <button id="btn-add-court" class="dashed-add-btn" style="margin-bottom: 40px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#183988" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
       </button>
+
       <div class="save-container">
-          <button class="btn-save-venue" onclick="alert('Simpan semua perubahan JSON ke Backend')">Simpan Perubahan Venue</button>
+          <button id="btn-save-venue" class="btn-save-venue">Simpan Perubahan Venue</button>
       </div>
-      
+      <p id="admin-msg" style="margin-top:12px;"></p>
+
     </section>
 
     <section class="admin-panel admin-bookings-section">
-      <h2>Manajemen Pesanan Baru</h2>
-      
+      <h2>Manajemen Pesanan</h2>
+
       <div class="tabs">
         <button class="tab-btn active" data-filter="all">Semua</button>
         <button class="tab-btn" data-filter="pending">Menunggu Pembayaran</button>
-        <button class="tab-btn" data-filter="completed">Selesai</button>
+        <button class="tab-btn" data-filter="paid">Lunas</button>
       </div>
 
       <div class="table-responsive">
@@ -87,8 +101,7 @@
               <th>Aksi</th>
             </tr>
           </thead>
-          <tbody id="admin-bookings-table">
-            </tbody>
+          <tbody id="admin-bookings-table"></tbody>
         </table>
       </div>
     </section>
